@@ -1,0 +1,16 @@
+# Root-level ignores
+.env
+node_modules/
+dist/
+*.log
+
+# Also include backend ignores
+backend/__pycache__/
+backend/*.pyc
+backend/.env
+backend/*.sqlite3
+
+# Add frontend ignores
+frontend/node_modules/
+frontend/build/
+frontend/.env
