@@ -18,7 +18,7 @@ class OnboardModel(models.Model):
     schoolRegion = models.CharField(max_length=255)
     schoolResidentialAddress = models.CharField(max_length=255)
     schoolLogoImage = models.ImageField(upload_to='school_logo/', blank=True, null=True)
-    dateFilled = models.DateTimeField(auto_now_add=True)
+    dateOnboarded = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.schoolName
