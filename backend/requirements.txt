@@ -11,3 +11,4 @@ redis
 django-tenants
 whitenoise
 dj-database-url
+pillow

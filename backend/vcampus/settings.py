@@ -15,6 +15,8 @@ from pathlib import Path
 from datetime import timedelta
 from django.core.management.utils import get_random_secret_key
 import dj_database_url
+from urllib.parse import quote_plus
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,33 +80,30 @@ WSGI_APPLICATION = 'vcampus.wsgi.application'
 # Database
 
 # --- Local Postgres defaults (docker-compose) ---
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME", "vcampus_db")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
 
-LOCAL_DB_URL = (
-    f"postgres://{DB_USER}:{DB_PASSWORD}@"
-    f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+# URL-encode user and password to handle special characters
+quoted_user = quote_plus(DB_USER)
+quoted_password = quote_plus(DB_PASSWORD)
 
-# If DATABASE_URL is present (e.g., on Render/Aiven), use it; else use local
+LOCAL_DB_URL = f"postgres://{quoted_user}:{quoted_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# If DATABASE_URL is present (e.g., on Render), use it; else use local
 DB_URL = os.getenv("DATABASE_URL", LOCAL_DB_URL)
 
-# Require SSL automatically when using a cloud DB (DATABASE_URL present),
-# or override explicitly with DB_SSL_REQUIRE=1/0
-SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE")
-               or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
+# Require SSL automatically when using a cloud DB
+SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE") or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
 
 DATABASES = {
-    "default": dj_database_url.parse(
-        DB_URL,
-        conn_max_age=600,
-        ssl_require=SSL_REQUIRE,
-    )
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
