@@ -1,6 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
-./scripts/wait_for_db.sh
+
+echo "Waiting for database..."
+/app/scripts/wait_for_db.sh db:5432 --timeout=30 --strict
+
+echo "Running migrations..."
 python manage.py migrate --noinput
-python manage.py collectstatic --noinput
-gunicorn vcampus.wsgi:application --bind 0.0.0.0:8000 --workers 3
+
+echo "Starting Gunicorn..."
+exec gunicorn vcampus.wsgi:application \
+    --bind 0.0.0.0:8000 \
+    --workers 3

@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import *
+from .views import RegisterAPIView, OnboardAPIView, DashboardAPIView
 
 urlpatterns = [
-    path('register/',UserRegistrationView, name='register'),
-    path('onboard/',OnboardFormView, name='onboarding'),
-    path('dashboard/',UserDashboardView, name='user_dashboard'),
+    path('api/register/', RegisterAPIView.as_view(), name='api_register'),
+    path('api/onboard/', OnboardAPIView.as_view(), name='api_onboard'),
+    path('api/dashboard/', DashboardAPIView.as_view(), name='api_dashboard'),
 ]
