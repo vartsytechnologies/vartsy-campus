@@ -1,6 +1,7 @@
+# accounts/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import OnboardModel
+from .models import SchoolOnboard  # renamed to match your model
 from django.contrib.auth.hashers import make_password
 
 
@@ -28,12 +29,12 @@ class OnboardSerializer(serializers.ModelSerializer):
     schoolLogoImage = serializers.ImageField(required=False)
 
     class Meta:
-        model = OnboardModel
+        model = SchoolOnboard
         fields = '__all__'
-        read_only_fields = ('user', 'dateOnboarded')
+        read_only_fields = ('userAccount', 'dateOnboard')
 
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        validated_data['userAccount'] = self.context['request'].user
         return super().create(validated_data)
 
 

@@ -3,13 +3,13 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.contrib.auth import login
+from rest_framework_simplejwt.tokens import RefreshToken 
 from .serializers import (
     UserRegistrationSerializer,
     OnboardSerializer,
     UserDashboardSerializer
 )
-from .models import OnboardModel
+from .models import SchoolOnboard
 
 
 class RegisterAPIView(APIView):
@@ -19,11 +19,12 @@ class RegisterAPIView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            # Auto-login (optional for API)
-            login(request, user)
+            refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "User registered successfully",
-                "user": {"email": user.email}
+                "user": {"email": user.email},
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
