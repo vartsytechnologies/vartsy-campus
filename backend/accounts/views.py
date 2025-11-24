@@ -10,8 +10,8 @@ from django.contrib.auth import get_user_model
 
 from .utils import _set_jwt_cookies, _clear_jwt_cookies
 from .serializers import (
-    UserRegistrationSerializer,UserSerializer,OnboardSerializer,
-    ChangePasswordSerializer,ForgotPasswordSerializer,ResetPasswordSerializer
+    UserRegistrationSerializer,UserSerializer,ChangePasswordSerializer,
+    ForgotPasswordSerializer,ResetPasswordSerializer
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
