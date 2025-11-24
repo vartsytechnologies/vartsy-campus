@@ -23,8 +23,10 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser = True.')
         return self.create_user(email, password, **extra_fields)
     
-class User(AbstractBaseUser, PermissionsMixin):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
+    is_email_verified = models.BooleanField(default=False)
+    
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default = timezone.now)
@@ -39,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
 class SchoolOnboard(models.Model):
     userAccount = models.OneToOneField(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='onboarded_school'
     )

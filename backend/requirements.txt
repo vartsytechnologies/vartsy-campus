@@ -12,3 +12,5 @@ django-tenants
 whitenoise
 dj-database-url
 pillow
+djangorestframework-simplejwt[crypto]
+google-auth>=2.23.0

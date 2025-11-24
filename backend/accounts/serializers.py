@@ -1,33 +1,70 @@
 # accounts/serializers.py
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model 
 from .models import SchoolOnboard  # renamed to match your model
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
+from django.utils.http import  urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
+CustomUser = get_user_model()
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'email', 'is_active', 'is_staff', 'date_joined')
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
-        fields = ('email', 'password', 'confirm_password')
-
-    def validate(self, data):
-        if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError("Passwords do not match.")
-        return data
+        model = CustomUser
+        fields = ('email', 'password')
 
     def create(self, validated_data):
-        validated_data.pop('confirm_password')
+        validated_data.pop('password')
         validated_data['username'] = validated_data['email']
-        user = User.objects.create_user(**validated_data)
+        user = CustomUser.objects.create_user(**validated_data)
         return user
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class ResetPasswordSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8)
+
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value
+
+    def validate(self, attrs):
+        try:
+            uid = force_str(urlsafe_base64_decode(attrs["uid"]))
+        except Exception:
+            raise serializers.ValidationError({"uid": "invalid"})
+        try:
+            user = CustomUser.objects.get(pk=uid)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError({"uid": "invalid"})
+        if not PasswordResetTokenGenerator().check_token(user, attrs["token"]):
+            raise serializers.ValidationError({"token": "invalid"})
+        attrs["user"] = user
+        return attrs
 
 
 class OnboardSerializer(serializers.ModelSerializer):
     schoolLogoImage = serializers.ImageField(required=False)
-
     class Meta:
         model = SchoolOnboard
         fields = '__all__'
@@ -36,11 +73,3 @@ class OnboardSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['userAccount'] = self.context['request'].user
         return super().create(validated_data)
-
-
-class UserDashboardSerializer(serializers.ModelSerializer):
-    onboard = OnboardSerializer(read_only=True)
-
-    class Meta:
-        model = User
-        fields = ('id', 'email', 'date_joined', 'onboard')

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "corsheaders",
     # "django_tenants",        # enable when setting up multi-tenancy
     "accounts",
+    "rest_framework_simplejwt.token_blacklist",
+
 ]
 
 MIDDLEWARE = [
@@ -56,6 +58,29 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "accounts.authentication.CookieJWTAuthentication",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "V-Campus API",
+    "DESCRIPTION": "Core backend for V-Campus (Auth, ERP, LMS, etc.)",
+    "VERSION": "0.1.0",
+}
 
 ROOT_URLCONF = 'vcampus.urls'
 
@@ -75,6 +100,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'vcampus.wsgi.application'
+
 
 
 # Database
@@ -99,10 +125,11 @@ DB_URL = os.getenv("DATABASE_URL", LOCAL_DB_URL)
 SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE") or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.parse(
+        DB_URL,
+        conn_max_age=600,
+        ssl_require=SSL_REQUIRE,
+    )
 }
 
 # Password validation
@@ -151,10 +178,23 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Cookie settings for SPA on a different domain/subdomain ---
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
+# CSRF/CORS for cookie auth
+SESSION_COOKIE_SECURE = os.getenv("COOKIE_SECURE", "True") == "True"
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
+CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS")]
+
+SAMESITE = os.getenv("COOKIE_SAMESITE")  # "Lax" if same-site only
+# Names we’ll use for JWT cookies
+ACCESS_TOKEN_COOKIE_NAME = "vc_access"
+REFRESH_TOKEN_COOKIE_NAME = "vc_refresh"
+
+# Email settings
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+
+
