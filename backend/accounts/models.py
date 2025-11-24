@@ -16,6 +16,8 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('role', CustomUser.Roles.SUPER_ADMIN)
+
        
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True')
@@ -24,20 +26,37 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
     
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    class Roles(models.TextChoices):
+        SCHOOL_ADMIN = "SCHOOL_ADMIN", "School Admin"
+        SUPER_ADMIN = "SUPER_ADMIN", "Super Admin"   # you can map this to Django superuser
+
     email = models.EmailField(unique=True)
+    role = models.CharField(
+        max_length=20,
+        choices=Roles.choices,
+        default=Roles.SCHOOL_ADMIN   # default role for normal users
+    )
+
     is_email_verified = models.BooleanField(default=False)
     
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(default = timezone.now)
+    date_joined = models.DateTimeField(default=timezone.now)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS= []
+    REQUIRED_FIELDS = []
+
+    def is_school_admin(self):
+        return self.role == self.Roles.SCHOOL_ADMIN
+
+    def is_super_admin(self):
+        return self.role == self.Roles.SUPER_ADMIN
 
     def __str__(self):
         return self.email
+
     
 class SchoolOnboard(models.Model):
     userAccount = models.OneToOneField(

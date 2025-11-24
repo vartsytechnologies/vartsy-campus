@@ -1,7 +1,6 @@
 # accounts/serializers.py
 from rest_framework import serializers
 from django.contrib.auth import get_user_model 
-from .models import SchoolOnboard  # renamed to match your model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.http import  urlsafe_base64_decode
 from django.utils.encoding import force_str
@@ -61,15 +60,3 @@ class ResetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({"token": "invalid"})
         attrs["user"] = user
         return attrs
-
-
-class OnboardSerializer(serializers.ModelSerializer):
-    schoolLogoImage = serializers.ImageField(required=False)
-    class Meta:
-        model = SchoolOnboard
-        fields = '__all__'
-        read_only_fields = ('userAccount', 'dateOnboard')
-
-    def create(self, validated_data):
-        validated_data['userAccount'] = self.context['request'].user
-        return super().create(validated_data)

@@ -24,6 +24,10 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.db import transaction
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
+
 
 def health(_):
     return JsonResponse({"status": "ok"})
@@ -157,16 +161,70 @@ class LogoutView(APIView):
         resp = Response({"detail": "logout ok"})
         _clear_jwt_cookies(resp)
         return resp
-    
-    
-class OnboardAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-    
+
+
+class GoogleOneTapView(APIView):
+    permission_classes = [AllowAny]
+
+    @transaction.atomic
     def post(self, request):
-        serializer = OnboardSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                "message": "School onboarded successfully"
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        """
+        Body: { "credential": "<google id_token>" }
+        """
+        cred = (request.data or {}).get("credential")
+        if not cred:
+            return Response({"detail": "missing credential"}, status=400)
+
+        try:
+            # Verify signature, expiry, audience
+            idinfo = google_id_token.verify_oauth2_token(
+                cred,
+                google_requests.Request(),
+                settings.GOOGLE_CLIENT_ID,
+            )
+        except Exception:
+            return Response({"detail": "invalid google token"}, status=400)
+
+        # Basic checks
+        if idinfo.get("aud") != settings.GOOGLE_CLIENT_ID:
+            return Response({"detail": "audience mismatch"}, status=400)
+        if not idinfo.get("email"):
+            return Response({"detail": "email required"}, status=400)
+        if not idinfo.get("email_verified", False):
+            return Response({"detail": "unverified email"}, status=400)
+
+        email = idinfo["email"].lower()
+        first_name = idinfo.get("given_name") or ""
+        last_name  = idinfo.get("family_name") or ""
+        picture    = idinfo.get("picture")  # (optional, ignore for now)
+
+        User = get_user_model()
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            # Only allow admins to sign in at this stage
+            if user.role != User.Roles.SCHOOL_ADMIN:
+                return Response({"detail": "role not allowed for One Tap"}, status=403)
+        else:
+            # Controlled auto-signup
+            if not settings.GOOGLE_ALLOW_AUTO_SIGNUP:
+                return Response({"detail": "signup disabled"}, status=403)
+
+            # Create SCHOOL_ADMIN only
+            user = User(
+                email=email,
+                username=email.split("@")[0],  # safe default
+                first_name=first_name[:150],
+                last_name=last_name[:150],
+                role=getattr(User.Roles, settings.GOOGLE_ALLOWED_SIGNUP_ROLE, User.Roles.SCHOOL_ADMIN),
+                is_email_verified=True,
+            )
+            user.set_unusable_password()
+            user.save()
+
+        # Issue JWT cookies (reuse your helpers)
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        resp = Response({"detail": "google sign-in ok"})
+        _set_jwt_cookies(resp, str(access), str(refresh))
+        return resp
