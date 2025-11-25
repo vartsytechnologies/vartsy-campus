@@ -5,9 +5,9 @@ from .models import CustomUser, SchoolOnboard
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('id', 'email', 'is_staff', 'is_active',)
+    list_display = ('id', 'email',"role","is_email_verified", 'is_staff', 'is_active',)
     list_filter = ('is_staff', 'is_active',)
-    search_fields = ('email',)
+    search_fields = ('email','id')
     ordering = ('id',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),

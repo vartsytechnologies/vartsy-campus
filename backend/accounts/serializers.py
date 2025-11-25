@@ -20,9 +20,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ('email', 'password')
 
     def create(self, validated_data):
-        validated_data.pop('password')
-        validated_data['username'] = validated_data['email']
+        pwd = validated_data.pop('password')
         user = CustomUser.objects.create_user(**validated_data)
+        user.role = CustomUser.Roles.SCHOOL_ADMIN
+        user.set_password(pwd)
+        user.save()
         return user
 
 

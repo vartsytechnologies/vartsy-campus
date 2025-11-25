@@ -21,7 +21,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-from django.urls import re_path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,4 +31,7 @@ urlpatterns = [
     path("", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
  ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-# 
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

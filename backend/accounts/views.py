@@ -14,7 +14,6 @@ from .serializers import (
     ForgotPasswordSerializer,ResetPasswordSerializer
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer,TokenRefreshSerializer
     
 from django.core.mail import send_mail
@@ -83,6 +82,7 @@ class RegisterAPIView(APIView):
             return Response({
                 "message": "User registered successfully",
                 "user": {"email": user.email,
+                         "role": user.role,
                          "is_email_verified": user.is_email_verified},
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -108,11 +108,10 @@ class ForgotPasswordView(APIView):
     def post(self, request):
         ser = ForgotPasswordSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        User = get_user_model()
         email = ser.validated_data["email"]
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
             # Don't reveal whether email exists
             return Response({"detail": "ok"})
 
@@ -146,10 +145,14 @@ class MeView(APIView):
     serializer_class = UserSerializer
     
     def get(self, request):
-        return Response(UserSerializer(request.user).data)
+        data = UserSerializer(request.user).data
+        # mark accounts created via social/google where no usable password was set
+        data["is_social"] = not request.user.has_usable_password()
+        return Response(data)
 
 
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         # optional: blacklist refresh
         refresh = request.COOKIES.get(settings.REFRESH_TOKEN_COOKIE_NAME)
@@ -198,12 +201,11 @@ class GoogleOneTapView(APIView):
         last_name  = idinfo.get("family_name") or ""
         picture    = idinfo.get("picture")  # (optional, ignore for now)
 
-        User = get_user_model()
-        user = User.objects.filter(email=email).first()
+        user = CustomUser.objects.filter(email=email).first()
 
         if user:
             # Only allow admins to sign in at this stage
-            if user.role != User.Roles.SCHOOL_ADMIN:
+            if user.role != CustomUser.Roles.SCHOOL_ADMIN:
                 return Response({"detail": "role not allowed for One Tap"}, status=403)
         else:
             # Controlled auto-signup
@@ -211,12 +213,9 @@ class GoogleOneTapView(APIView):
                 return Response({"detail": "signup disabled"}, status=403)
 
             # Create SCHOOL_ADMIN only
-            user = User(
+            user = CustomUser(
                 email=email,
-                username=email.split("@")[0],  # safe default
-                first_name=first_name[:150],
-                last_name=last_name[:150],
-                role=getattr(User.Roles, settings.GOOGLE_ALLOWED_SIGNUP_ROLE, User.Roles.SCHOOL_ADMIN),
+                role=getattr(CustomUser.Roles, settings.GOOGLE_ALLOWED_SIGNUP_ROLE, CustomUser.Roles.SCHOOL_ADMIN),
                 is_email_verified=True,
             )
             user.set_unusable_password()

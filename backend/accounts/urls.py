@@ -11,7 +11,7 @@ urlpatterns = [
     
     path('auth/register/', RegisterAPIView.as_view(), name='register'),
     path('auth/login/', EmailTokenObtainPairView.as_view(), name='login'),
-    path('auth/token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('auth/me/', MeView.as_view(), name='me'),
     path("auth/csrf/", CsrfBootstrapView.as_view(), name="auth-csrf"),
