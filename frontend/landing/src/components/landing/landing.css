@@ -1,0 +1,63 @@
+:root{
+  --brand-deep: #1b0440; /* deep purple */
+  --accent-teal: #00efd1; /* bright teal */
+  --accent-deepblue: #2a1bd9; /* register button deep blue */
+  --soft-pink: #feeef0; /* pale pink bar */
+  --heading-white: #f8f3f8;
+}
+
+.lp-hero{
+  position: relative;
+  color: var(--heading-white);
+  overflow: hidden;
+}
+.lp-hero .bg-image{
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.6) saturate(1.05);
+}
+.lp-hero .overlay-grad{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(27,4,64,0.85) 0%, rgba(58,10,77,0.55) 30%, rgba(0,0,0,0.15) 100%);
+}
+.lp-hero .hero-inner{
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 1.25rem 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.lp-brand-pill{
+  display: inline-flex;
+  align-items: center;
+  gap: .75rem;
+  background: var(--soft-pink);
+  padding: .5rem 1rem;
+  border-radius: 28px;
+}
+.lp-brand-pill .dot{ width: 10px; height: 10px; border-radius: 999px; background:#6ee7b7 }
+.lp-hero h1{ font-size: clamp(2rem, 6vw, 4rem); line-height:1.02; margin:0; font-weight:700 }
+.lp-hero p{ max-width:720px; color: rgba(255,255,255,0.85) }
+.lp-cta{ display:inline-block; background: var(--accent-teal); color: #062023; padding: .75rem 1.25rem; border-radius: 999px; font-weight:700; box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+
+.lp-stats{
+  max-width: 1100px;
+  margin:  -2rem auto 2rem;
+  padding: 1rem;
+}
+.lp-stats .cards{ display:flex; gap:1rem; justify-content:space-between; align-items:center }
+.stat-card{ background: var(--soft-pink); padding:1.25rem 1.5rem; border-radius: 18px; flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column }
+.stat-number{ font-size:1.75rem; font-weight:800 }
+.stat-label{ font-size:.875rem; color: #2b2b2b }
+
+/* Responsive adjustments */
+@media (max-width: 720px){
+  .lp-hero .hero-inner{ padding-top:3rem }
+  .lp-stats .cards{ flex-direction: column }
+  .stat-card{ width:100% }
+}
