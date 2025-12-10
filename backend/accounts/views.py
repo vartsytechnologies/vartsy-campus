@@ -210,9 +210,6 @@ class GoogleOneTapView(APIView):
             return Response({"detail": "unverified email"}, status=400)
 
         email = idinfo["email"].lower()
-        first_name = idinfo.get("given_name") or ""
-        last_name  = idinfo.get("family_name") or ""
-        picture    = idinfo.get("picture")  # (optional, ignore for now)
 
         user = CustomUser.objects.filter(email=email).first()
 
