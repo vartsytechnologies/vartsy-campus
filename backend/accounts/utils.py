@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework.response import Response
 
 
-def _set_jwt_cookies(response: Response, access_token: str, refresh_token: str):
+def set_jwt_cookies(response: Response, access_token: str, refresh_token: str):
     cookie_params = dict(
         secure=getattr(settings, "SESSION_COOKIE_SECURE", True),
         httponly=True,
@@ -21,6 +21,6 @@ def _set_jwt_cookies(response: Response, access_token: str, refresh_token: str):
     )
 
 
-def _clear_jwt_cookies(resp: Response):
+def clear_jwt_cookies(resp: Response):
     resp.delete_cookie(settings.ACCESS_TOKEN_COOKIE_NAME, samesite=getattr(settings, "SAMESITE", "None"), secure=getattr(settings, "SESSION_COOKIE_SECURE", True))
     resp.delete_cookie(settings.REFRESH_TOKEN_COOKIE_NAME, samesite=getattr(settings, "SAMESITE", "None"), secure=getattr(settings, "SESSION_COOKIE_SECURE", True))

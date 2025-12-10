@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 
-from .utils import _set_jwt_cookies, _clear_jwt_cookies
+from .utils import set_jwt_cookies, clear_jwt_cookies
 from .serializers import (
     UserRegistrationSerializer,UserSerializer,ChangePasswordSerializer,
     ForgotPasswordSerializer,ResetPasswordSerializer
@@ -48,12 +48,25 @@ class EmailTokenObtainPairView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        result = super().post(request, *args, **kwargs)
+        try:
+            result = super().post(request, *args, **kwargs)
+        except Exception:
+            return Response({"detail": "Invalid credentials"}, status=401)
+
         access = result.data.get("access")
         refresh = result.data.get("refresh")
-        resp = Response({"detail": "login successful"}, status=status.HTTP_200_OK)
-        _set_jwt_cookies(resp, access, refresh)
+
+        # Return user info instead of "login successful"
+        user = self.user  # TokenObtainPairSerializer sets `self.user`
+
+        resp = Response({
+            "message": "login successful",
+            "user": UserSerializer(user).data,
+        })
+
+        set_jwt_cookies(resp, access, refresh)
         return resp
+
 
 class CookieTokenRefreshView(TokenRefreshView):
     permission_classes = [AllowAny]
@@ -69,7 +82,7 @@ class CookieTokenRefreshView(TokenRefreshView):
         result = super().post(request, *args, **kwargs)
         access = result.data.get("access")
         resp = Response({"detail": "refresh ok"}, status=status.HTTP_200_OK)
-        _set_jwt_cookies(resp, access, None)
+        set_jwt_cookies(resp, access, None)
         return resp
     
 class RegisterAPIView(APIView):
@@ -99,7 +112,7 @@ class ChangePasswordView(APIView):
         user.set_password(ser.validated_data["new_password"])
         user.save()
         resp = Response({"detail": "password changed"})
-        _clear_jwt_cookies(resp)
+        clear_jwt_cookies(resp)
         return resp
 
 class ForgotPasswordView(APIView):
@@ -162,7 +175,7 @@ class LogoutView(APIView):
             except Exception:
                 pass
         resp = Response({"detail": "logout ok"})
-        _clear_jwt_cookies(resp)
+        clear_jwt_cookies(resp)
         return resp
 
 
