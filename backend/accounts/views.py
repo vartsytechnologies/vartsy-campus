@@ -238,5 +238,5 @@ class GoogleOneTapView(APIView):
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         resp = Response({"detail": "google sign-in ok"})
-        _set_jwt_cookies(resp, str(access), str(refresh))
+        set_jwt_cookies(resp, str(access), str(refresh))
         return resp
