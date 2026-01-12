@@ -67,7 +67,7 @@ export default function Accordion() {
                 : "max-h-0 opacity-0"
             }`}
           >
-            <div className="px-4 pb-6 text-gray-700 leading-relaxed">
+            <div className="px-4 pb-6 text-gray-800 leading-relaxed">
               {item.content}
             </div>
           </div>
