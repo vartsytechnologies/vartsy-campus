@@ -1,12 +1,9 @@
-import { Inter, Geist, Geist_Mono } from "next/font/google";
+import { Instrument_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ScrollToTop from "@/components/Totop";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
   subsets: ["latin"],
 });
 
@@ -24,9 +21,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${inter.variable}  ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${instrumentSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <ScrollToTop />
       </body>
     </html>
   );

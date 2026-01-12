@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
 function Navbar() {
@@ -57,23 +58,26 @@ function Navbar() {
       >
         <div className="flex items-center justify-between w-full">
           <div>
-            <p className="font-semibold text-gray-800">VartsySMS</p>
+            <p className="font-bold text-gray-800">VartsySMS</p>
           </div>
 
           <div className="hidden md:block">
-            <ul className="flex items-center space-x-6 [&>li]:cursor-pointer [&>li]:text-(--custom-blue-2) [&>li]:hover:text-(--custom-blue-1) [&>li]:transition-colors">
+            <ul className="flex items-center space-x-6 [&>li]:cursor-pointer [&>li]:font-semibold [&>li]:text-gray-800 [&>li]:hover:text-(--custom-blue-1) [&>li]:transition-colors">
               <li>Home</li>
-              <li>Features</li>
+
               <li>About</li>
+              <li>Features</li>
               <li>Book a Demo</li>
               <li>Contact</li>
             </ul>
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="font-bold cursor-pointer hover:bg-(--custom-blue-3)/90 transition-colors duration-300 leading-none text-(--custom-blue-2) rounded-full bg-(--custom-blue-3) px-6 md:px-10 py-3">
-              Register
-            </button>
+            <Link href="/signup">
+              <button className="font-bold cursor-pointer hover:bg-(--custom-blue-2)/90 transition-colors duration-300 leading-none  rounded-full bg-(--custom-blue-4) px-6 md:px-10 py-3">
+                Register
+              </button>
+            </Link>
 
             <button
               id="hamburger-button"

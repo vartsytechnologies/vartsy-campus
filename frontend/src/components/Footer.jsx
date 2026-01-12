@@ -61,15 +61,14 @@ function Footer() {
                   href="tel:+233550988226"
                   className="transition-colors duration-300 block hover:opacity-80"
                 >
-                  +233(0)550-988-226
+                  +233(0) 550-988-226
                 </a>
               </p>
-              <p className="text-xs mt-1">Available Mon-Fri, 8 AM-5 PM</p>
             </div>
 
             {/* Email Us */}
             <div className="space-y-1 font-normal">
-              <p className="underline underline-offset-2">Email Us</p>
+              <p className="underline underline-offset-2">Email </p>
 
               <p>
                 <a
@@ -80,6 +79,7 @@ function Footer() {
                 </a>
               </p>
             </div>
+            <p className="text-sm mt-1">Available Mon-Fri, 8 AM-5 PM</p>
           </div>
         </div>
 

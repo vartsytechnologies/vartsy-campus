@@ -1,11 +1,11 @@
 import Image from "next/image";
-import Accordion from "./landingComponents/Accordion";
+import Accordion from "./main/Accordion";
 import item from "../assets/hero_landing.png";
 import img from "../assets/img.png";
 import sub from "../assets/sub.png";
 import Navbar from "@/components/Navbar.jsx";
 import Footer from "@/components/Footer";
-import Contact from "./landingComponents/Contact";
+import Contact from "./main/Contact";
 
 function Landing() {
   return (
@@ -39,28 +39,28 @@ function Landing() {
       <div className="absolute left-1/2 -translate-x-1/2 z-11 -mt-11 w-11/12 shadow-lg md:w-10/12 rounded-3xl  bg-white flex items-center justify-around p-4">
         <div className="text-black border-r border-(--custom-blue-2) w-full flex items-center justify-center  flex-col md:flex-row">
           <p className="text-base lg:text-5xl p-2 font-semibold">200+</p>
-          <p className="text-sm md:text-base">
+          <p className="text-sm md:text-base font-medium">
             Schools <br />
             <span className="text-(--custom-blue-2)">Enrolled</span>
           </p>
         </div>
         <div className="text-black border-r border-(--custom-blue-2) w-full flex items-center justify-center  flex-col md:flex-row">
           <p className="text-base lg:text-5xl p-2 font-semibold">200+</p>
-          <p className="text-sm md:text-base">
+          <p className="text-sm md:text-base font-medium">
             Schools <br />
             <span className="text-(--custom-blue-2)">Enrolled</span>
           </p>
         </div>
         <div className="text-black w-full flex items-center justify-center  flex-col md:flex-row">
           <p className="text-base lg:text-5xl p-2 font-semibold">200+</p>
-          <p className="text-sm md:text-base">
+          <p className="text-sm md:text-base font-medium">
             Schools <br />
             <span className="text-(--custom-blue-2)">Enrolled</span>
           </p>
         </div>
       </div>
       <main className="relative w-full min-h-screen bg-(--custom-blue)/90 overflow-hidden">
-        <div className="hidden w-[500px] h-[500px] rounded-full md:block absolute z-10 -right-60 top-[340px] -translate-y-1/2 bg-(--custom-blue-2) pointer-events-none"></div>
+        <div className="hidden w-[500px] h-[500px] rounded-full md:block absolute z-10 -right-60 top-[340px] -translate-y-1/2 bg-(--custom-blue-4) pointer-events-none"></div>
         <section className="relative w-11/12 mt-30 mx-auto md:w-10/12 grid grid-cols-1 md:grid-cols-2 z-15 gap-10 md:gap-0">
           <div className=" flex items-start gap-5 justify-between flex-col ">
             <div>
