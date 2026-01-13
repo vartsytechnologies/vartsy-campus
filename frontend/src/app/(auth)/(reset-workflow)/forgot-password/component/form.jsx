@@ -105,7 +105,7 @@ function ForgotPasswordForm() {
           </div>
           <Button
             type="submit"
-            className="md:bg-white bg-(--custom-green) text-white md:text-(--custom-green) w-full mt-2 md:mt-10"
+            className="md:bg-white bg-(--custom-green) cursor-pointer text-white md:text-(--custom-green) w-full mt-2 md:mt-10"
           >
             Get Link
           </Button>

@@ -2,6 +2,7 @@ import { Instrument_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "@/components/Totop";
 import Logo from "@/assets/white.svg";
+import { AuthProvider } from "@/context/AuthContext";
 
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
@@ -28,7 +29,8 @@ export default function RootLayout({ children }) {
         className={`${instrumentSans.variable} ${geistMono.variable} antialiased `}
         data-scroll-behavior="smooth"
       >
-        {children}
+        {/* Children with auth provider */}
+        <AuthProvider>{children}</AuthProvider>
         <ScrollToTop />
       </body>
     </html>
