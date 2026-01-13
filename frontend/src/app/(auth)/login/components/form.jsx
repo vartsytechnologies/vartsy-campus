@@ -28,7 +28,7 @@ function LoginForm() {
       TEACHER: "/teacher-dashboard",
       STUDENT: "/student-dashboard",
     };
-    router.push(routes["STUDENT"] || "/login");
+    router.replace(routes["STUDENT"] || "/login");
   };
   return (
     <>

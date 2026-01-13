@@ -39,9 +39,9 @@ function Login() {
               <Button className="w-full cursor-pointer mb-1 xl:mb-2 bg-transparent border border-[#606060] ">
                 Log in with Google
               </Button>
-              <Button className="w-full cursor-pointer  mb-1 xl:mb-2 bg-transparent border border-[#606060]">
+              {/* <Button className="w-full cursor-pointer  mb-1 xl:mb-2 bg-transparent border border-[#606060]">
                 Log in with Apple
-              </Button>
+              </Button> */}
             </div>
             <div className="relative my-[5px] xl:my-3">
               <div className="absolute inset-0 flex items-center">
