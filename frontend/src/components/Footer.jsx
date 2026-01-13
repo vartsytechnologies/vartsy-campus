@@ -1,5 +1,6 @@
 import Link from "next/link";
-
+import Logo from "@/assets/white.svg";
+import Image from "next/image";
 function Footer() {
   return (
     <footer className="w-full grid place-items-center bg-(--custom-blue-2) py-10 text-white">
@@ -101,14 +102,17 @@ function Footer() {
             &copy; {new Date().getFullYear()} VartySMS. All rights reserved.
           </p>
           <div className="flex items-center order-2 self-start md:self-center text-xs md:text-sm">
-            <span className="mr-2">Product of</span>
+            <span className="mr-2">Product &nbsp;|</span>
             <a
               href="https://vartsy-systems.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center hover:opacity-80 transition-all duration-300 group"
             >
-              <span className="transition-colors duration-300 font-bold tracking-wide">
+              <div className=" relative w-5 h-5">
+                <Image className="object-contain" src={Logo} alt="Logo" fill />
+              </div>
+              <span className="ml-1 transition-colors duration-300 font-medium underline tracking-wide">
                 Vartsy Systems
               </span>
             </a>

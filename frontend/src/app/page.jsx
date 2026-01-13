@@ -6,6 +6,16 @@ import sub from "../assets/sub.png";
 import Navbar from "@/components/Navbar.jsx";
 import Footer from "@/components/Footer";
 import Contact from "./main/Contact";
+import Link from "next/link";
+import Logo from "@/assets/white.svg";
+
+export const metadata = {
+  title: " Home | Vartsy Campus ",
+  description: "Innovating Education with Vartsy Campus",
+  icons: {
+    icon: Logo.src,
+  },
+};
 
 function Landing() {
   return (
@@ -20,8 +30,8 @@ function Landing() {
         />
         <div className="absolute inset-0 bg-linear-to-l from-(--custom-blue-1)/50 to-(--custom-blue-2)/90  w-full h-full "></div>
         <Navbar />
-        <div className="relative min-h-screen w-11/12 md:w-10/12 mx-auto  flex items-start justify-center space-y-10 flex-col">
-          <p className="md:w-3/4 text-3xl md:text-4xl lg:text-6xl lg:leading-16 font-semibold tracking-tight">
+        <div className="relative min-h-screen w-11/12 md:w-10/12 mx-auto  flex items-start justify-center  space-y-6 lg:space-y-10 flex-col">
+          <p className="w-full xl:w-3/4 text-3xl lg:text-4xl  xl:text-6xl lg:leading-10 xl:leading-16 font-semibold tracking-tight">
             Boost academic <br /> performance with our <br />
             student management module
           </p>
@@ -31,31 +41,39 @@ function Landing() {
             nemo eos velit, animi est incidunt odio quidem alias neque voluptas
             necessitatibus autem?
           </p>
-          <button className="font-bold cursor-pointer hover:bg-(--custom-blue-3)/90 transition-colors duration-300 text-xl leading-none text-(--custom-blue-2) rounded-full bg-(--custom-blue-3)  px-10 py-4 flex items-center justify-center">
-            Register
-          </button>
+          <Link href="/signup">
+            <button className="font-bold cursor-pointer hover:bg-(--custom-blue-3)/90 transition-colors duration-300 text-xl leading-none text-(--custom-blue-2) rounded-full bg-(--custom-blue-3)  px-10 py-4 flex items-center justify-center">
+              Register
+            </button>
+          </Link>
         </div>
       </header>
       <div className="absolute left-1/2 -translate-x-1/2 z-11 -mt-11 w-11/12 shadow-lg md:w-10/12 rounded-3xl  bg-white flex items-center justify-around p-4">
         <div className="text-black border-r border-(--custom-blue-2) w-full flex items-center justify-center  flex-col md:flex-row">
-          <p className="text-base lg:text-5xl p-2 font-semibold">200+</p>
+          <p className="text-base lg:text-4xl xl:text-5xl p-2 font-semibold">
+            200+
+          </p>
           <p className="text-sm md:text-base font-medium">
             Schools <br />
             <span className="text-(--custom-blue-2)">Enrolled</span>
           </p>
         </div>
         <div className="text-black border-r border-(--custom-blue-2) w-full flex items-center justify-center  flex-col md:flex-row">
-          <p className="text-base lg:text-5xl p-2 font-semibold">200+</p>
+          <p className="text-base lg:text-4xl xl:text-5xl p-2 font-semibold">
+            200+
+          </p>
           <p className="text-sm md:text-base font-medium">
             Schools <br />
             <span className="text-(--custom-blue-2)">Enrolled</span>
           </p>
         </div>
         <div className="text-black w-full flex items-center justify-center  flex-col md:flex-row">
-          <p className="text-base lg:text-5xl p-2 font-semibold">200+</p>
+          <p className="text-base lg:text-4xl xl:text-5xl p-2 font-semibold">
+            16
+          </p>
           <p className="text-sm md:text-base font-medium">
-            Schools <br />
-            <span className="text-(--custom-blue-2)">Enrolled</span>
+            Regions <br />
+            <span className="text-(--custom-blue-2)">In Ghana</span>
           </p>
         </div>
       </div>

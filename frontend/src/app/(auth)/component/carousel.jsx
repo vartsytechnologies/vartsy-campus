@@ -99,11 +99,11 @@ const AuthCarousel = ({ slides, autoPlayInterval = 5000 }) => {
               </div>
             )}
 
-            <h2 className="text-3xl font-bold mb-4 text-center">
+            <h2 className="text-xl xl:text-3xl font-bold mb-4 text-center">
               {slide.heading}
             </h2>
 
-            <p className="text-lg text-center text-purple-100 max-w-md">
+            <p className="text-base xl:text-lg text-center text-purple-100 max-w-md">
               {slide.description}
             </p>
           </div>
