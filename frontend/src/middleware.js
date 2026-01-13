@@ -15,7 +15,7 @@
 
 import { NextResponse } from "next/server";
 
-export default function middleware(request) {
+export default function proxy(request) {
   const token = request.cookies.get("token")?.value; // name of cookie should apear here
 
   //   logged in?
