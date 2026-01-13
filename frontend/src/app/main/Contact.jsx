@@ -21,10 +21,10 @@ function Contact() {
         </h1>
       </div>
 
-      <div className="relative md:p-8 w-full md:w-10/12 mx-auto mb-12 mt-5 md:mt-12 pb-12 rounded-none">
-        <div className="grid grid-cols-1 lg:grid-cols-[520px_1fr] md:gap-8">
-          <div className="order-2 md:order-1 w-11/12 mx-auto lg:w-full flex md:p-8 flex-col py-7 md:py-0 justify-start">
-            <div className="grid grid-cols-1 gap-6 md:gap-8 py-4">
+      <div className="relative md:p-8 w-full md:w-10/12 mx-auto mb-0 md:mb-12 mt-5 md:mt-8  pb-12 rounded-none">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5">
+          <div className="order-2 md:order-1 w-11/12 mx-auto lg:w-full flex  flex-col px-5 md:px-6 lg:px-0 py-7 md:py-0 justify-start">
+            <div className="grid grid-cols-1 gap-6 md:gap-8 py-4 ">
               <div className="flex flex-row gap-4 md:gap-6 items-start group transition-all duration-300">
                 <div
                   className="w-12 h-12 md:w-14 md:h-14 rounded-lg border backdrop-blur-sm flex items-center justify-center transition-all duration-300"
@@ -110,7 +110,7 @@ function Contact() {
             </div>
           </div>
 
-          <div className="order-1 md:order-2 flex items-start justify-center px-5 md:px-6 lg:px-0">
+          <div className="order-1 md:order-2 flex items-start justify-center px-5 md:px-6 lg:px-0 ">
             <div className="w-full rounded-none overflow-hidden p-0 border-none">
               <form className="w-full mt-5" onSubmit={handleSubmission}>
                 <div className="flex flex-col gap-8 text-sm md:text-base">

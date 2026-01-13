@@ -115,7 +115,7 @@ function SignupForm() {
           </label>
         </div>
 
-        <div className="relative w-full mt-4">
+        <div className="relative w-full mt-3 xl:mt-4">
           <div className="relative w-full">
             <input
               id="password"
@@ -156,7 +156,7 @@ function SignupForm() {
             </button>
           </div>
         </div>
-        <div className="relative w-full mt-4">
+        <div className="relative w-full mt-3 xl:mt-4">
           <div className="relative w-full">
             <input
               id="confirm-password"
@@ -200,7 +200,7 @@ function SignupForm() {
 
         <Button
           type="submit"
-          className="bg-(--custom-green)  text-white hover:bg-(--custom-green) hover:text-white w-full mt-3 md:mt-4"
+          className="bg-(--custom-green) cursor-pointer  text-white hover:bg-(--custom-green) hover:text-white w-full mt-3 md:mt-4"
         >
           Create account
         </Button>

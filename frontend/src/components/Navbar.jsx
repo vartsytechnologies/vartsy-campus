@@ -61,7 +61,7 @@ function Navbar() {
             <p className="font-bold text-gray-800">VartsySMS</p>
           </div>
 
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <ul className="flex items-center space-x-6 [&>li]:cursor-pointer [&>li]:font-semibold [&>li]:text-gray-800 [&>li]:hover:text-(--custom-blue-1) [&>li]:transition-colors">
               <li>Home</li>
 
@@ -82,7 +82,7 @@ function Navbar() {
             <button
               id="hamburger-button"
               onClick={toggleMenu}
-              className="md:hidden text-(--custom-blue-2) hover:text-(--custom-blue-1) transition-all duration-300"
+              className="lg:hidden text-(--custom-blue-2) hover:text-(--custom-blue-1) transition-all duration-300"
             >
               <div
                 className={`transition-transform duration-300 ${
@@ -102,7 +102,7 @@ function Navbar() {
 
       <div
         id="mobile-dropdown"
-        className={`fixed top-28 left-1/2 -translate-x-1/2 w-11/12 bg-gray-100 rounded-3xl shadow-lg z-40 md:hidden transition-all duration-300 overflow-hidden ${
+        className={`fixed top-28 left-1/2 -translate-x-1/2 w-11/12 bg-gray-100 rounded-3xl shadow-lg z-40 lg:hidden transition-all duration-300 overflow-hidden ${
           isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >

@@ -89,7 +89,7 @@ function LoginForm() {
             Email address
           </label>
         </div>
-        <div className="relative w-full mt-4">
+        <div className="relative w-full mt-3 xl:mt-4">
           <input
             id="password"
             name="password"
@@ -118,7 +118,7 @@ function LoginForm() {
           <button
             type="button"
             onClick={() => setEye(!eye)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+            className="absolute  right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
           >
             {eye ? (
               <Eye strokeWidth={1} size={18} />
@@ -136,7 +136,7 @@ function LoginForm() {
         </div>
         <Button
           type="submit"
-          className="bg-(--custom-green) text-white hover:bg-(--custom-green) hover:text-white w-full mt-2 md:mt-4"
+          className="bg-(--custom-green) cursor-pointer text-white hover:bg-(--custom-green) hover:text-white w-full mt-2 md:mt-4"
         >
           Log in
         </Button>
