@@ -6,6 +6,16 @@ import sub from "../assets/sub.png";
 import Navbar from "@/components/Navbar.jsx";
 import Footer from "@/components/Footer";
 import Contact from "./main/Contact";
+import Link from "next/link";
+import Logo from "@/assets/white.svg";
+
+export const metadata = {
+  title: " Home | Vartsy Campus ",
+  description: "Innovating Education with Vartsy Campus",
+  icons: {
+    icon: Logo.src,
+  },
+};
 
 function Landing() {
   return (
@@ -31,9 +41,11 @@ function Landing() {
             nemo eos velit, animi est incidunt odio quidem alias neque voluptas
             necessitatibus autem?
           </p>
-          <button className="font-bold cursor-pointer hover:bg-(--custom-blue-3)/90 transition-colors duration-300 text-xl leading-none text-(--custom-blue-2) rounded-full bg-(--custom-blue-3)  px-10 py-4 flex items-center justify-center">
-            Register
-          </button>
+          <Link href="/signup">
+            <button className="font-bold cursor-pointer hover:bg-(--custom-blue-3)/90 transition-colors duration-300 text-xl leading-none text-(--custom-blue-2) rounded-full bg-(--custom-blue-3)  px-10 py-4 flex items-center justify-center">
+              Register
+            </button>
+          </Link>
         </div>
       </header>
       <div className="absolute left-1/2 -translate-x-1/2 z-11 -mt-11 w-11/12 shadow-lg md:w-10/12 rounded-3xl  bg-white flex items-center justify-around p-4">
@@ -52,10 +64,10 @@ function Landing() {
           </p>
         </div>
         <div className="text-black w-full flex items-center justify-center  flex-col md:flex-row">
-          <p className="text-base lg:text-5xl p-2 font-semibold">200+</p>
+          <p className="text-base lg:text-5xl p-2 font-semibold">16</p>
           <p className="text-sm md:text-base font-medium">
-            Schools <br />
-            <span className="text-(--custom-blue-2)">Enrolled</span>
+            Regions <br />
+            <span className="text-(--custom-blue-2)">In Ghana</span>
           </p>
         </div>
       </div>
