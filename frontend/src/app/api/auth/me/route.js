@@ -7,7 +7,7 @@ export async function GET() {
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
-    console.log("No token found in cookies");
+    // console.log("No token found in cookies");
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 

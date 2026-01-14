@@ -73,7 +73,7 @@ function Navbar() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/signup">
+            <Link href="/admin/signup">
               <button className="font-bold cursor-pointer hover:bg-(--custom-blue-2)/90 transition-colors duration-300 leading-none  rounded-full bg-(--custom-blue-4) px-6 md:px-10 py-3">
                 Register
               </button>

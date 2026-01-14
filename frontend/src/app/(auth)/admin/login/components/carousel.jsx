@@ -1,7 +1,7 @@
-import AuthCarousel from "@/app/(auth)/component/carousel";
-import firstImage from "../../../../assets/signup.png";
-import signup2 from "../../../../assets/signup2.svg";
-import signup3 from "../../../../assets/signup3.svg";
+import AuthCarousel from "../../component/carousel";
+import firstImage from "@/assets/signup.png";
+import signup2 from "@/assets/signup2.svg";
+import signup3 from "@/assets/signup3.svg";
 
 function SignupCarousel() {
   const loginSlides = [

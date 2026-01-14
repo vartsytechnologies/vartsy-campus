@@ -207,7 +207,7 @@ function SignupForm() {
         <div className="flex items-start justify-start mt-1 font-medium border-red-500">
           <p className="text-xs md:text-sm ">
             Have an account already?
-            <Link href="/login">
+            <Link href="/admin/login">
               <span className="ml-2 text-(--custom-green)">Sign in</span>
             </Link>
           </p>

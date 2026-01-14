@@ -129,7 +129,7 @@ function LoginForm() {
           </button>
         </div>
         <div className="flex items-end mt-1 justify-end ">
-          <Link href="/forgot-password">
+          <Link href="/admin/forgot-password">
             <p className="text-xs md:text-sm font-medium text-(--custom-green)">
               Forgot your password?
             </p>
@@ -144,7 +144,7 @@ function LoginForm() {
         <div className="flex items-start justify-start mt-1 font-medium">
           <p className="text-xs md:text-sm ">
             Don't have an account?
-            <Link href="/signup">
+            <Link href="/admin/signup">
               <span className="ml-2 text-(--custom-green)">
                 Create an account
               </span>

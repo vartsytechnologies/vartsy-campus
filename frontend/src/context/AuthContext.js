@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
     user,
     loading,
     logout,
-    refreshAuth: checkAuth, // Can manually refresh user data
+    refreshAuth: checkAuth,
   };
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
