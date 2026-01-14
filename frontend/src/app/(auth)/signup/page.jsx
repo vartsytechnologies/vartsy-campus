@@ -20,7 +20,7 @@ function SignUp() {
           <div className="hidden md:block bg-(--custom-green) rounded-l-[7.1px]">
             <SignupCarousel />
           </div>
-          <div className=" py-5 md:py-10  px-5 xl:px-8 ">
+          <div className=" py-10 md:py-15  px-5 xl:px-8 ">
             <div className="flex justify-between ">
               <h2 className="text-xl md:text-2xl font-semibold">
                 Get Started Now!
@@ -35,7 +35,7 @@ function SignUp() {
             <p className="text-[#606060] text-sm">
               Register an account for your school
             </p>
-            <div className="flex gap-1 flex-col mt-4">
+            <div className="flex gap-1 flex-col mt-5">
               <Button className="w-full mb-1 xl:mb-2 cursor-pointer bg-transparent border border-[#606060] ">
                 Log in with Google
               </Button>

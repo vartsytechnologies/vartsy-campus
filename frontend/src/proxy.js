@@ -14,17 +14,19 @@
 // };
 
 import { NextResponse } from "next/server";
+import { decodeJWT } from "@/lib/auth";
 
 export default function proxy(request) {
   const token = request.cookies.get("token")?.value; // name of cookie should apear here
 
   //   logged in?
   if (!token) {
+    console.log("No token found, redirecting to login");
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // extract user info from token
-  const user = extractUserFromToken(token);
+  const user = decodeJWT(token);
 
   if (!user || !user.role) {
     return NextResponse.redirect(new URL("/login", request.url));

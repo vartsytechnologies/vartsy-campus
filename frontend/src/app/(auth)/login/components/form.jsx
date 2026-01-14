@@ -3,32 +3,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [eye, setEye] = useState(false);
-  const { user, setUser } = useAuth();
-  const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const userRole = "STUDENT";
-    const userData = { role: userRole };
-
-    setUser(userData);
-    sessionStorage.setItem("user", JSON.stringify(userData));
-    console.log("Logged in with:", userData);
-
-    // Redirect based on role
-    const routes = {
-      ADMIN: "/admin-dashboard",
-      TEACHER: "/teacher-dashboard",
-      STUDENT: "/student-dashboard",
-    };
-    router.replace(routes["STUDENT"] || "/login");
+    // login here
   };
   return (
     <>
@@ -158,7 +141,7 @@ function LoginForm() {
         >
           Log in
         </Button>
-        <div className="flex items-start justify-start mt-1 font-medium border-red-500">
+        <div className="flex items-start justify-start mt-1 font-medium">
           <p className="text-xs md:text-sm ">
             Don't have an account?
             <Link href="/signup">
