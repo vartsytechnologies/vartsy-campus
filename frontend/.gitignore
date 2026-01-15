@@ -34,6 +34,7 @@ yarn-error.log*
 .env*
 .txt
 .txt.admin
+.txt-uses
 
 # vercel
 .vercel

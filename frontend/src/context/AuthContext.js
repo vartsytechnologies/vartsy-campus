@@ -60,6 +60,7 @@
 //   }
 //   return context;
 // };
+
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -89,25 +90,11 @@ export function AuthProvider({ children }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    // Check if current route needs user data
-    const isAuthRoute = AUTH_ROUTES.includes(pathname);
-    const isProtectedRoute =
-      !isAuthRoute &&
-      PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-
-    // Only fetch user on protected routes
-    if (isProtectedRoute) {
-      checkAuth();
-    } else {
-      setLoading(false);
-    }
-  }, [pathname]);
-
-  // Call /api/auth/me to get user data
   const checkAuth = async () => {
     try {
-      const response = await fetch("/api/auth/me");
+      const response = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
 
       if (response.ok) {
         const userData = await response.json();
@@ -123,11 +110,36 @@ export function AuthProvider({ children }) {
     }
   };
 
+  useEffect(() => {
+    // Check if current route needs user data
+    const isAuthRoute = AUTH_ROUTES.some((route) => pathname === route);
+    const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    if (isProtectedRoute) {
+      checkAuth();
+    } else {
+      setLoading(false);
+      setUser(null);
+    }
+  }, [pathname]);
+
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
       setUser(null);
-      router.push("/login");
+
+      const hostname = window.location.hostname;
+      const mainDomain = process.env.NEXT_PUBLIC_DOMAIN;
+
+      const isMainDomain =
+        hostname === mainDomain || hostname === `www.${mainDomain}`;
+
+      router.push(isMainDomain ? "/login" : "/portal");
     } catch (error) {
       console.error("Logout failed:", error);
     }
