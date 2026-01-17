@@ -15,6 +15,8 @@ from pathlib import Path
 from datetime import timedelta
 from django.core.management.utils import get_random_secret_key
 import dj_database_url
+from urllib.parse import quote_plus
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "False"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
 
@@ -43,10 +45,14 @@ INSTALLED_APPS = [
     "corsheaders",
     # "django_tenants",        # enable when setting up multi-tenancy
     "accounts",
+    "rest_framework_simplejwt.token_blacklist",
+
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -54,6 +60,29 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "accounts.authentication.CookieJWTAuthentication",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "V-Campus API",
+    "DESCRIPTION": "Core backend for V-Campus (Auth, ERP, LMS, etc.)",
+    "VERSION": "0.1.0",
+}
 
 ROOT_URLCONF = 'vcampus.urls'
 
@@ -74,28 +103,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'vcampus.wsgi.application'
 
-
 # Database
 
 # --- Local Postgres defaults (docker-compose) ---
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME", "vcampus_db")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
 
-LOCAL_DB_URL = (
-    f"postgres://{DB_USER}:{DB_PASSWORD}@"
-    f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+# URL-encode user and password to handle special characters
+quoted_user = quote_plus(DB_USER)
+quoted_password = quote_plus(DB_PASSWORD)
 
-# If DATABASE_URL is present (e.g., on Render/Aiven), use it; else use local
+LOCAL_DB_URL = f"postgres://{quoted_user}:{quoted_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# If DATABASE_URL is present (e.g., on Render), use it; else use local
 DB_URL = os.getenv("DATABASE_URL", LOCAL_DB_URL)
 
-# Require SSL automatically when using a cloud DB (DATABASE_URL present),
-# or override explicitly with DB_SSL_REQUIRE=1/0
-SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE")
-               or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
+# Require SSL automatically when using a cloud DB
+SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE") or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
 
 DATABASES = {
     "default": dj_database_url.parse(
@@ -104,7 +131,6 @@ DATABASES = {
         ssl_require=SSL_REQUIRE,
     )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -146,7 +172,33 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Cookie settings for SPA on a different domain/subdomain ---
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
+# CSRF/CORS for cookie auth
+SESSION_COOKIE_SECURE = os.getenv("COOKIE_SECURE", "True") == "True"
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
+CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS")]
+
+SAMESITE = os.getenv("COOKIE_SAMESITE")  # "Lax" if same-site only
+# Names we’ll use for JWT cookies
+ACCESS_TOKEN_COOKIE_NAME = "vc_access"
+REFRESH_TOKEN_COOKIE_NAME = "vc_refresh"
+
+# Email settings
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+#  Google OAuth settings
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_ALLOW_AUTO_SIGNUP = os.getenv("GOOGLE_ALLOW_AUTO_SIGNUP")
+GOOGLE_ALLOWED_SIGNUP_ROLE = os.getenv("GOOGLE_ALLOWED_SIGNUP_ROLE")
+
