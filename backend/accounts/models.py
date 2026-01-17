@@ -57,29 +57,4 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
-    
-class SchoolOnboard(models.Model):
-    userAccount = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='onboarded_school'
-    )
-    schoolName = models.CharField(max_length=255)
-    schoolType = models.CharField(max_length=255)
-    schoolEmail = models.EmailField(max_length=255, unique=True)
-    schoolRegion = models.CharField(max_length=255)
-    schoolLogoImage = models.ImageField(
-        upload_to='school_logo',
-        blank=True,
-        null=True,
-        help_text="optional logo (max 2 MB)"
-    )
 
-    dateOnboard = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = 'School Onboarding'
-        verbose_name_plural = 'School Onboardings'
-
-    def __str__(self):
-        return f"{self.schoolName} ({self.userAccount.email})"
