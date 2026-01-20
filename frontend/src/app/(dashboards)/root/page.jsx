@@ -2,6 +2,7 @@ function RootDashboard() {
   return <div>Root Dashboard</div>;
 }
 export default RootDashboard;
+
 // // app/admin/root/dashboard/page.tsx
 // 'use client';
 

@@ -16,8 +16,8 @@ function ForgotPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="bg-(--custom-green) md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
-        <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col rounded-md shadow-lg text-black md:text-white">
+      <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
+        <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">
           <h2 className="py-6 font-semibold">VartsySMS</h2>
           <div className="text-center px-4">
             <h1 className="text-(--custom-green) md:text-(--custom-blue-3) font-semibold text-xl md:text-2xl mb-4">
@@ -57,8 +57,8 @@ function ForgotPasswordForm() {
 
   //  normal form view
   return (
-    <div className="bg-(--custom-green) md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
-      <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col rounded-md shadow-lg text-black md:text-white">
+    <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
+      <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">
         <h2 className="py-6 font-semibold">VartsySMS</h2>
         <h1 className="text-(--custom-green) md:text-(--custom-blue-3) font-semibold text-xl md:text-2xl">
           Forgot your password?

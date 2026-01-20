@@ -15,8 +15,8 @@ export const metadata = {
 function SignUp() {
   return (
     <>
-      <div className="bg-(--custom-green) md:bg-(--custom-white)  w-full min-h-screen flex items-center justify-center">
-        <div className="w-11/12 lg:w-8/12  bg-white   rounded-md shadow-lg grid grid-cols-1 md:grid-cols-2 text-black">
+      <div className="bg-white md:bg-(--custom-white)  w-full min-h-screen flex items-center justify-center">
+        <div className="w-11/12 lg:w-8/12    md:rounded-md md:shadow-lg grid grid-cols-1 md:grid-cols-2 text-black">
           <div className="hidden md:block bg-(--custom-green) rounded-l-[7.1px]">
             <SignupCarousel />
           </div>
