@@ -1,5 +1,7 @@
 #!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
 
 echo "Waiting for database..."
 /app/scripts/wait_for_db.sh db:5432 --timeout=30 --strict
@@ -10,7 +12,7 @@ python manage.py migrate --noinput
 # Only create superuser if it does not exist
 python - <<'PY'
 import os, django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fusion_api.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'vcampus.settings')
 django.setup()
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
