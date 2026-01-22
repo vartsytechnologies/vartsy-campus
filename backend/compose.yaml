@@ -1,45 +1,75 @@
 
 name: vartsy-campus
 services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vcampus_user -d vcampus_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: vcampus_api
+    image: vcampus-backend:prod
+    command: /app/scripts/start_api.sh
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   worker:   # Celery (cron/alerts/async), kept from day 1 for easy enablement
-    build: .
-    command: celery -A vcampus worker -l info
-    env_file: [.env]
-    depends_on: [db, redis]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vcampus-worker:prod
+    command: /app/scripts/start_worker.sh 
+    env_file: 
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   beat:     # scheduled jobs (daily backups, reminders)
-    build: .
-    command: celery -A vcampus beat -l info
-    env_file: [.env]
-    depends_on: [db, redis]
-
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - pg_data:/var/lib/postgresql/data
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vcampus-beat:prod
+    command: /app/scripts/start_beat.sh
+    env_file: 
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   redis:
     image: redis:7-alpine
     ports: ["6379:6379"]
-
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   pg_data:

@@ -27,9 +27,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "False"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
-
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
+]
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if o.strip()
+]
 
 # Application definition
 
@@ -43,8 +48,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
-    # "django_tenants",        # enable when setting up multi-tenancy
-    "accounts",
+    "django_tenants",        # enable when setting up multi-tenancy
+    'accounts.apps.AccountsConfig',
+    'anymail',
+    "drf_spectacular_sidecar",
     "rest_framework_simplejwt.token_blacklist",
 
 ]
@@ -63,25 +70,27 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "accounts.authentication.CookieJWTAuthentication",
-    ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["accounts.authentication.CookieJWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"]
 }
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
 }
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "V-Campus API",
     "DESCRIPTION": "Core backend for V-Campus (Auth, ERP, LMS, etc.)",
     "VERSION": "0.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 ROOT_URLCONF = 'vcampus.urls'
@@ -104,13 +113,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'vcampus.wsgi.application'
 
 # Database
-
 # --- Local Postgres defaults (docker-compose) ---
-DB_NAME = os.getenv("DB_NAME", "vcampus_db")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("POSTGRES_DB","db")
+DB_USER = os.getenv("POSTGRES_USER","postgres")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD","postgres")
+DB_HOST = os.getenv("DB_HOST","localhost")
+DB_PORT = os.getenv("DB_PORT","5432")
 
 # URL-encode user and password to handle special characters
 quoted_user = quote_plus(DB_USER)
@@ -170,7 +178,7 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = '/media/'
@@ -181,21 +189,53 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- Cookie settings for SPA on a different domain/subdomain ---
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
-# CSRF/CORS for cookie auth
-SESSION_COOKIE_SECURE = os.getenv("COOKIE_SECURE", "True") == "True"
-CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
-CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS")]
 
-SAMESITE = os.getenv("COOKIE_SAMESITE")  # "Lax" if same-site only
 # Names we’ll use for JWT cookies
-ACCESS_TOKEN_COOKIE_NAME = "vc_access"
-REFRESH_TOKEN_COOKIE_NAME = "vc_refresh"
+ACCESS_TOKEN_COOKIE_NAME = os.getenv("ACCESS_TOKEN_COOKIE_NAME")
+REFRESH_TOKEN_COOKIE_NAME = os.getenv("REFRESH_TOKEN_COOKIE_NAME")
 
-# Email settings
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+
+SESSION_COOKIE_SECURE = os.getenv("COOKIE_SECURE")
+SAMESITE = os.getenv("SAMESITE")
+JWT_COOKIE_PATH = os.getenv("JWT_COOKIE_PATH")
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
+PUBLIC_API_BASE_URL = os.getenv("PUBLIC_API_BASE_URL")
+
+
+# Common settings
+EMAIL_BACKEND =os.environ.get("EMAIL_BACKEND")
+
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+def env_bool(name, default=False):
+    return os.getenv(name, str(default)).lower() == "true"
+
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS")
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL")
+SESSION_COOKIE_SECURE = env_bool("COOKIE_SECURE", True)
+
+
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+BREVO_API_URL = os.environ.get('BREVO_API_URL')
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
+
+# sms Credentials
+ARKESEL_SMS_API_URL = os.environ.get('ARKESEL_SMS_API_URL')
+ARKESEL_API_KEY = os.environ.get('ARKESEL_API_KEY')
+ARKESEL_SENDER_ID = os.environ.get('ARKESEL_SENDER_ID')
+
+# settings.py
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message="StreamingHttpResponse must consume synchronous iterators"
+)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
 
 #  Google OAuth settings
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")

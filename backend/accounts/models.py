@@ -7,10 +7,10 @@ class UserManager(BaseUserManager):
         if not (email):
             raise ValueError('Users must have an email address')
         email = self.normalize_email(email)
-        accountUser = self.model(email = email, **extra_fields)
-        accountUser.set_password(password)
-        accountUser.save(using=self._db)
-        return accountUser
+        user = self.model(email = email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
     
     def create_superuser(self, email, password = None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
@@ -30,12 +30,20 @@ class CustomUser(AbstractUser, PermissionsMixin):
         SCHOOL_ADMIN = "SCHOOL_ADMIN", "School Admin"
         SUPER_ADMIN = "SUPER_ADMIN", "Super Admin"   # you can map this to Django superuser
 
+    class AuthProvider(models.TextChoices):
+        LOCAL = "local", "Local"
+        GOOGLE = "google", "Google"
+        
+    username = None
     email = models.EmailField(unique=True)
     role = models.CharField(
         max_length=20,
         choices=Roles.choices,
         default=Roles.SCHOOL_ADMIN   # default role for normal users
     )
+    avatar_url = models.URLField(blank=True, null=True)
+    auth_provider = models.CharField(max_length=20, choices = AuthProvider.choices, default = AuthProvider.LOCAL)
+    provider_account_id = models.CharField(max_length=255, blank=True, null=True)
 
     is_email_verified = models.BooleanField(default=False)
     
@@ -46,7 +54,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = list[str] = []
 
     def is_school_admin(self):
         return self.role == self.Roles.SCHOOL_ADMIN

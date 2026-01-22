@@ -15,3 +15,5 @@ pillow
 djangorestframework-simplejwt[crypto]
 google-auth>=2.23.0
 requests>=2.31.0
+drf-spectacular-sidecar
+django-anymail
