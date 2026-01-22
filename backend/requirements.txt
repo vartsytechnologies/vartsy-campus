@@ -8,7 +8,6 @@ gunicorn
 django-environ
 celery[redis]
 redis
-django-tenants
 whitenoise
 dj-database-url
 pillow

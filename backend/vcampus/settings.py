@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
-    "django_tenants",        # enable when setting up multi-tenancy
+    # "django_tenants",        # enable when setting up multi-tenancy
     'accounts.apps.AccountsConfig',
     'anymail',
     "drf_spectacular_sidecar",
