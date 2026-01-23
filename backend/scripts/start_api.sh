@@ -7,6 +7,9 @@ echo "Waiting for database..."
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+echo "Setting up public tenant..."
+python manage.py setup_public_tenant
+
 echo "Ensuring superuser exists..."
 python - <<'PY'
 import os, django
