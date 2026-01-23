@@ -5,6 +5,7 @@ from .views import(
     LogoutView,MeView,ForgotPasswordView,
     GoogleOneTapView
 )
+from .views import CsrfBootstrapView
 
 urlpatterns = [    
     path("csrf/", CsrfBootstrapView.as_view(), name="auth-csrf"),
@@ -16,9 +17,8 @@ urlpatterns = [
     path('me/', MeView.as_view(), name='me'),
     path("google/onetap/", GoogleOneTapView.as_view(), name="auth-google-onetap"),
     
-    # Password management
+    # # Password management
     path("password/change/", ChangePasswordView.as_view(), name="auth-password-change"),
     path("password/forgot/", ForgotPasswordView.as_view(), name="auth-password-forgot"),
-
 
 ]

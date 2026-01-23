@@ -45,11 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts.apps.AccountsConfig',
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
-    # "django_tenants",        # enable when setting up multi-tenancy
-    'accounts.apps.AccountsConfig',
     'anymail',
     "drf_spectacular_sidecar",
     "rest_framework_simplejwt.token_blacklist",

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
 
 class UserManager(BaseUserManager):
@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser = True.')
         return self.create_user(email, password, **extra_fields)
     
-class CustomUser(AbstractUser, PermissionsMixin):
+class CustomUser(AbstractUser):
     class Roles(models.TextChoices):
         SCHOOL_ADMIN = "SCHOOL_ADMIN", "School Admin"
         SUPER_ADMIN = "SUPER_ADMIN", "Super Admin"   # you can map this to Django superuser
@@ -54,7 +54,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = list[str] = []
+    REQUIRED_FIELDS = []
 
     def is_school_admin(self):
         return self.role == self.Roles.SCHOOL_ADMIN

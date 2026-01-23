@@ -16,7 +16,7 @@ from .serializers import (
     EmailVerificationSendSerializer, EmailVerificationConfirmSerializer,
     LoginRequestSerializer
 )
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from django.db import IntegrityError
 from drf_spectacular.utils import extend_schema, OpenApiExample,OpenApiResponse
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
     
 CustomUser = get_user_model()
 
-#---------- CSRF VIEW ----------
+# #---------- CSRF VIEW ----------
 class CsrfBootstrapView(APIView):
     permission_classes = [AllowAny]
     
@@ -177,7 +177,7 @@ class ResendEmailVerificationView(APIView):
         **email_details})
 
 #---------- LOGIN VIEW ----------
-class LoginView(APIView, TokenObtainPairView):
+class LoginView(APIView):
     serializer_class = LoginRequestSerializer
     permission_classes = [AllowAny]
     @extend_schema(
