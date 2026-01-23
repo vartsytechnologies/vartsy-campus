@@ -14,7 +14,7 @@ from .serializers import (
     RegisterSerializer,MeSerializer,
     PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
     EmailVerificationSendSerializer, EmailVerificationConfirmSerializer,
-    LoginRequestSerializer
+    LoginRequestSerializer, GoogleOneTapSerializer
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
@@ -398,16 +398,23 @@ class ChangePasswordView(APIView):
 
 
 class GoogleOneTapView(APIView):
+    serializer_class = GoogleOneTapSerializer
     permission_classes = [AllowAny]
-
+    @extend_schema(
+    auth=[],  # public
+    request=GoogleOneTapSerializer,
+    responses={200: {"type":"object","properties":{"detail":{"type":"string"}}}, 400: dict},
+    description="Sign in or sign up using Google One Tap with the provided ID token.",
+    tags=["Authentication"],
+    )
     @transaction.atomic
     def post(self, request):
         """
         Body: { "credential": "<google id_token>" }
         """
-        cred = (request.data or {}).get("credential")
-        if not cred:
-            return Response({"detail": "missing credential"}, status=400)
+        ser = self.serializer_class(data=request.data)
+        ser.is_valid(raise_exception=True)
+        cred = ser.validated_data["credential"]
 
         try:
             # Verify signature, expiry, audience
@@ -443,6 +450,11 @@ class GoogleOneTapView(APIView):
             # Create SCHOOL_ADMIN only
             user = CustomUser(
                 email=email,
+                avatar_url=idinfo.get("picture"),
+                first_name=idinfo.get("given_name", ""),
+                last_name=idinfo.get("family_name", ""),
+                auth_provider=CustomUser.AuthProvider.GOOGLE,
+                provider_account_id=idinfo.get("sub"),
                 role=getattr(CustomUser.Roles, settings.GOOGLE_ALLOWED_SIGNUP_ROLE, CustomUser.Roles.SCHOOL_ADMIN),
                 is_email_verified=True,
             )
@@ -452,6 +464,8 @@ class GoogleOneTapView(APIView):
         # Issue JWT cookies (reuse your helpers)
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
-        resp = Response({"detail": "google sign-in ok"})
+        resp = Response({
+            "message": "google sign-in successful.",
+            "user data": MeSerializer(user).data,})
         set_jwt_cookies(resp, str(access), str(refresh))
         return resp

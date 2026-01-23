@@ -37,27 +37,49 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Application definition
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'accounts.apps.AccountsConfig',
+# --- django-tenants ---
+SHARED_APPS = (
+    # django-tenants must be first
+    "django_tenants",
+    # app that contains the Tenant and Domain models
+    "tenancy.apps.TenancyConfig",
+    # standard Django shared apps
+    "django.contrib.contenttypes",
+    "django.contrib.auth",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.admin",
+    # project shared apps
+    "accounts.apps.AccountsConfig",
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
-    'anymail',
+    "anymail",
     "drf_spectacular_sidecar",
     "rest_framework_simplejwt.token_blacklist",
+)
 
-]
+TENANT_APPS = (
+    # apps whose tables live per-tenant
+    "django.contrib.contenttypes",
+    "rest_framework",
+    # later: attendance, classes, finance, etc.
+)
+
+
+TENANT_MODEL = "tenancy.School"           # app_label.ModelName
+TENANT_DOMAIN_MODEL = "tenancy.SchoolDomain"
+
+
+DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
+
+INSTALLED_APPS = list(dict.fromkeys(SHARED_APPS + TENANT_APPS))
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    "django_tenants.middleware.main.TenantMainMiddleware",  # must be near top
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,6 +88,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 REST_FRAMEWORK = {
@@ -138,6 +161,9 @@ DATABASES = {
         ssl_require=SSL_REQUIRE,
     )
 }
+
+# Use the django-tenants PostgreSQL backend
+DATABASES["default"]["ENGINE"] = "django_tenants.postgresql_backend"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

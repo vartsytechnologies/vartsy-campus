@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 CustomUser = get_user_model()
 
 AVAILABLE = {f.name for f in CustomUser._meta.get_fields()}
-DESIRED = ("id", "email", "first_name", "last_name", "role", "is_email_verified", "avatar_url", "auth_provider")
+DESIRED = ("id", "email", "first_name", "last_name", "role", "is_email_verified", "avatar_url", "auth_provider", "date_joined","provider_account_id")
 ME_FIELDS = [f for f in DESIRED if f in AVAILABLE]
 
 class RegisterSerializer(serializers.Serializer):
@@ -48,7 +48,7 @@ class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ME_FIELDS
-        read_only_fields = tuple(f for f in ("id", "email", "auth_provider", "is_email_verified") if f in ME_FIELDS)
+        read_only_fields = tuple(f for f in ("id", "email", "auth_provider", "is_email_verified","date_joined","provider_account_id") if f in ME_FIELDS)
 
 class LoginRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -76,3 +76,6 @@ class EmailVerificationSendSerializer(serializers.Serializer):
 class EmailVerificationConfirmSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()
+
+class GoogleOneTapSerializer(serializers.Serializer):
+    credential = serializers.CharField()

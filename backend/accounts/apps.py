@@ -7,8 +7,8 @@ class AccountsConfig(AppConfig):
     def ready(self):
         # import the spectacular extension so drf-spectacular discovers it
         try:
-            # use a relative import so static analyzers resolve the module within the package
-            from . import spectacular_auth  # noqa: F401
+            # ensure OpenAPI auth extension is registered
+            from . import schema  # noqa: F401
         except Exception:
             # ignore if the optional module is missing or fails to import
             pass
