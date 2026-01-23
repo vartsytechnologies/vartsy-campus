@@ -73,7 +73,7 @@ class EmailVerificationSendSerializer(serializers.Serializer):
             raise serializers.ValidationError("No user is associated with this email.")
         return email
 
-class EmailVerificationConfirmSerializer(serializers.Serializer):
+class EmailVerificationSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()
 

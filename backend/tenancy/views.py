@@ -1,15 +1,13 @@
-from django.shortcuts import render
-
 # Create your views here.
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
+from accounts.utils import IsVerified
 
 class WhoAmIInTenantView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsVerified]
     @extend_schema(
-        auth=["cookie_jwt"],  # use the cookie JWT auth
         responses={200: {
             "type": "object",
             "properties": {

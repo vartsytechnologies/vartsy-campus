@@ -13,7 +13,7 @@ from .utils import (
 from .serializers import (
     RegisterSerializer,MeSerializer,
     PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
-    EmailVerificationSendSerializer, EmailVerificationConfirmSerializer,
+    EmailVerificationSendSerializer, EmailVerificationSerializer,
     LoginRequestSerializer, GoogleOneTapSerializer
 )
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -91,17 +91,25 @@ class RegisterAPIView(APIView):
             logger.exception("Failed to send verification email")
             email_details = {"ok": False, "error": str(e)}
 
-# ---------- EMAIL VERIFICATION CONFIRM ----------
-class EmailVerificationConfirmView(APIView):
+        # Return created user representation
+        return Response(
+            {
+                "message": "User registered successfully. Please verify your email.",
+                "user data": MeSerializer(user).data,
+                "email_details": email_details,
+            }, status=status.HTTP_201_CREATED)
+
+# ---------- EMAIL VERIFICATION VIEW ----------
+class EmailVerificationView(APIView):
     permission_classes = [AllowAny]
-    serializer_class = EmailVerificationConfirmSerializer
+    serializer_class = EmailVerificationSerializer
     @extend_schema(
     auth=[],  # public
-    request=EmailVerificationConfirmSerializer,
+    request=EmailVerificationSerializer,
     responses={200: {"type":"object","properties":{"ok":{"type":"boolean"},"message":{"type":"string"}}},
                400: {"type":"object","properties":{"detail":{"type":"string"}}}},
     description="Confirm email verification with uid and token.",
-    examples=[OpenApiExample("Confirm", value={"uid":"<uidb64>","token":"<token>"})],
+    examples=[OpenApiExample("Verify", value={"uid":"<uidb64>","token":"<token>"})],
     tags=["Authentication"],
     )
     def post(self, request):

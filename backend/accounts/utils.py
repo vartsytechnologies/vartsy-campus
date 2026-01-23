@@ -66,7 +66,7 @@ def send_verification_email(user):
     link = build_frontend_url(f"/auth/verify-email?uid={uid}&token={token}")
     send_mail(
         subject="Verify your email",
-        message=f"Hi,\n\nConfirm your email by clicking:\n{link}\n\nThanks!",
+        message=f"Hi,\n\nPlease verify your email by clicking:\n{link}\n\nThanks!",
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
         fail_silently=False,
