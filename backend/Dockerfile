@@ -23,7 +23,11 @@ COPY . .
 
 # Static dir + permissions
 RUN mkdir -p /app/staticfiles \
-    && chown -R appuser:appuser /app
+    && chown -R appuser:appuser /app \
+    && chmod +x /app/scripts/start_api.sh \
+    && chmod +x /app/scripts/wait_for_db.sh \
+    && chmod +x /app/scripts/start_beat.sh \
+    && chmod +x /app/scripts/start_worker.sh
 
 USER appuser
 
