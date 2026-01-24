@@ -138,9 +138,9 @@ WSGI_APPLICATION = 'vcampus.wsgi.application'
 
 # Database
 # --- Local Postgres defaults (docker-compose) ---
-DB_NAME = os.getenv("POSTGRES_DB","db")
-DB_USER = os.getenv("POSTGRES_USER","postgres")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD","postgres")
+DB_NAME = os.getenv("DB_NAME","vcampus_db")
+DB_USER = os.getenv("DB_USER","vcampus_user")
+DB_PASSWORD = os.getenv("DB_PASSWORD","vcampus_password")
 DB_HOST = os.getenv("DB_HOST","localhost")
 DB_PORT = os.getenv("DB_PORT","5432")
 
