@@ -15,6 +15,8 @@ from pathlib import Path
 from datetime import timedelta
 from django.core.management.utils import get_random_secret_key
 import dj_database_url
+from urllib.parse import quote_plus
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,28 +27,62 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
-
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
+]
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if o.strip()
+]
 
 # Application definition
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+# --- django-tenants ---
+SHARED_APPS = (
+    # django-tenants must be first
+    "django_tenants",
+    # app that contains the Tenant and Domain models
+    "tenancy.apps.TenancyConfig",
+    # standard Django shared apps
+    "django.contrib.contenttypes",
+    "django.contrib.auth",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.admin",
+    # project shared apps
+    "accounts.apps.AccountsConfig",
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
-    # "django_tenants",        # enable when setting up multi-tenancy
-    "accounts",
-]
+    "anymail",
+    "drf_spectacular_sidecar",
+    "rest_framework_simplejwt.token_blacklist",
+
+)
+
+TENANT_APPS = (
+    # apps whose tables live per-tenant
+    "django.contrib.contenttypes",
+    "rest_framework",
+    "onboarding",
+    # later: attendance, classes, finance, etc.
+)
+
+
+TENANT_MODEL = "tenancy.School"           # app_label.ModelName
+TENANT_DOMAIN_MODEL = "tenancy.SchoolDomain"
+
+
+DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
+
+INSTALLED_APPS = list(dict.fromkeys(SHARED_APPS + TENANT_APPS))
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    "django_tenants.middleware.main.TenantMainMiddleware",  # must be near top
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -54,6 +90,32 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["accounts.authentication.CookieJWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"]
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "V-Campus API",
+    "DESCRIPTION": "Core backend for V-Campus (Auth, ERP, LMS, etc.)",
+    "VERSION": "0.1.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
 
 ROOT_URLCONF = 'vcampus.urls'
 
@@ -74,28 +136,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'vcampus.wsgi.application'
 
-
 # Database
-
 # --- Local Postgres defaults (docker-compose) ---
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("POSTGRES_DB","db")
+DB_USER = os.getenv("POSTGRES_USER","postgres")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD","postgres")
+DB_HOST = os.getenv("DB_HOST","localhost")
+DB_PORT = os.getenv("DB_PORT","5432")
 
-LOCAL_DB_URL = (
-    f"postgres://{DB_USER}:{DB_PASSWORD}@"
-    f"{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+# URL-encode user and password to handle special characters
+quoted_user = quote_plus(DB_USER)
+quoted_password = quote_plus(DB_PASSWORD)
 
-# If DATABASE_URL is present (e.g., on Render/Aiven), use it; else use local
+LOCAL_DB_URL = f"postgres://{quoted_user}:{quoted_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# If DATABASE_URL is present (e.g., on Render), use it; else use local
 DB_URL = os.getenv("DATABASE_URL", LOCAL_DB_URL)
 
-# Require SSL automatically when using a cloud DB (DATABASE_URL present),
-# or override explicitly with DB_SSL_REQUIRE=1/0
-SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE")
-               or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
+# Require SSL automatically when using a cloud DB
+SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE") or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
 
 DATABASES = {
     "default": dj_database_url.parse(
@@ -105,6 +164,8 @@ DATABASES = {
     )
 }
 
+# Use the django-tenants PostgreSQL backend
+DATABASES["default"]["ENGINE"] = "django_tenants.postgresql_backend"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -144,9 +205,67 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Names we’ll use for JWT cookies
+ACCESS_TOKEN_COOKIE_NAME = os.getenv("ACCESS_TOKEN_COOKIE_NAME")
+REFRESH_TOKEN_COOKIE_NAME = os.getenv("REFRESH_TOKEN_COOKIE_NAME")
+
+
+SESSION_COOKIE_SECURE = os.getenv("COOKIE_SECURE")
+SAMESITE = os.getenv("SAMESITE")
+JWT_COOKIE_PATH = os.getenv("JWT_COOKIE_PATH")
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
+PUBLIC_API_BASE_URL = os.getenv("PUBLIC_API_BASE_URL")
+
+
+# Common settings
+EMAIL_BACKEND =os.environ.get("EMAIL_BACKEND")
+
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+def env_bool(name, default=False):
+    return os.getenv(name, str(default)).lower() == "true"
+
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS")
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL")
+SESSION_COOKIE_SECURE = env_bool("COOKIE_SECURE", True)
+
+
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+BREVO_API_URL = os.environ.get('BREVO_API_URL')
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY')
+
+# sms Credentials
+ARKESEL_SMS_API_URL = os.environ.get('ARKESEL_SMS_API_URL')
+ARKESEL_API_KEY = os.environ.get('ARKESEL_API_KEY')
+ARKESEL_SENDER_ID = os.environ.get('ARKESEL_SENDER_ID')
+
+# settings.py
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message="StreamingHttpResponse must consume synchronous iterators"
+)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+
+#  Google OAuth settings
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_ALLOW_AUTO_SIGNUP = os.getenv("GOOGLE_ALLOW_AUTO_SIGNUP")
+GOOGLE_ALLOWED_SIGNUP_ROLE = os.getenv("GOOGLE_ALLOWED_SIGNUP_ROLE")
+
