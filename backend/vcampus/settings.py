@@ -66,6 +66,7 @@ TENANT_APPS = (
     "django.contrib.contenttypes",
     "rest_framework",
     "onboarding",
+    "academics",
     # later: attendance, classes, finance, etc.
 )
 
@@ -112,9 +113,22 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "V-Campus API",
-    "DESCRIPTION": "Core backend for V-Campus (Auth, ERP, LMS, etc.)",
+    "DESCRIPTION": "Unified School Management Platform (Auth, ERP, LMS, Fees, Onboarding, Academics, etc.)",
     "VERSION": "0.1.0",
-    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_INCLUDE_SCHEMA": True, 
+    "SCHEMA_PATH_PREFIX": "/api/v1",
+    "COMPONENT_NO_READ_ONLY_REQUIRED": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+        "filter": True,
+    },
+    "REDOC_SETTINGS": {
+        "hideHostname": False,
+    },
+    "ENUM_NAME_OVERRIDES": {},
+    "ENABLE_LIST_MECHANICS_ON_NON_2XX": True,
 }
 
 ROOT_URLCONF = 'vcampus.urls'

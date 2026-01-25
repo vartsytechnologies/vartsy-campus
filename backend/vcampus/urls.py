@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/auth/', include('accounts.urls')),
     path("api/tenant/", include("tenancy.urls")),    # tenant utilities
     path('api/onboarding/', include('onboarding.urls')),
+    path('api/v1/academic/', include('academics.urls')),
 
     # Healthcheck endpoint for container probes
     path('healthz', healthz, name='healthz-no-slash'),  # without trailing slash
