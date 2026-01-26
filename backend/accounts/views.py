@@ -210,33 +210,36 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         ser = self.serializer_class(data=request.data)
         ser.is_valid(raise_exception=True)
+
         email = ser.validated_data["email"]
         password = ser.validated_data["password"]
-        try:
-            user = authenticate(request, email=email, password=password)
-        except Exception:
-            return Response({"detail": "Invalid credentials"}, status=401)
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is None:
+            return Response(
+                {"detail": "Invalid email or password"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
         if not user.is_email_verified:
-            # Do NOT set cookies; tell the client to verify
             return Response({
                 "detail": "Email not verified. Please verify your email.",
                 "requires_email_verification": True
-            }, status=403)
-        
-        # Generate JWT tokens
+            }, status= status.HTTP_403_FORBIDDEN)
+
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
 
-        # Prepare response payload
         response = Response({
             "message": "Login successful.",
-            "user data": MeSerializer(user).data})
+            "user data": MeSerializer(user).data
+        })
 
-        # Set HttpOnly cookies using your utils
         set_jwt_cookies(response, str(access), str(refresh))
 
         return response
+
     
 
 #----------- LOGOUT VIEW ----------
