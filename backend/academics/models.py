@@ -29,12 +29,38 @@ class AcademicYear(models.Model):
     
     def save(self, *args, **kwargs):
         if self.is_current:
+            # Unset other current years
             AcademicYear.objects.filter(
-                school = self.school,
-                is_current = True
+                school=self.school,
+                is_current=True
             ).exclude(pk=self.pk).update(is_current=False)
-        super().save(*args, **kwargs)
 
+            if not self.terms.exists():
+                from datetime import timedelta
+
+                Term.objects.bulk_create([
+                    Term(
+                        academic_year=self,
+                        term_number='1',
+                        start_date=self.start_date,
+                        end_date=self.start_date + timedelta(days=120),  # ≈ 4 months
+                        is_current=True,
+                    ),
+                    Term(
+                        academic_year=self,
+                        term_number='2',
+                        start_date=self.start_date + timedelta(days=121),
+                        end_date=self.start_date + timedelta(days=240),
+                    ),
+                    Term(
+                        academic_year=self,
+                        term_number='3',
+                        start_date=self.start_date + timedelta(days=241),
+                        end_date=self.end_date,
+                    ),
+                ])
+
+        super().save(*args, **kwargs)
 
 class Term(models.Model):
     TERM_CHOICES = (

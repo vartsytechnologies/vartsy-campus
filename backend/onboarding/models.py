@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 from tenancy.models import School
 from django.core.validators import MinValueValidator, MaxValueValidator
+from academics.models import AcademicYear, Term, ClassLevel, ClassGroup, Subject
+from django.core.exceptions import ValidationError
 
 
 class OnboardingProgress(models.Model):
@@ -74,6 +76,13 @@ class OnboardingStep(models.Model):
         STAFF_INVITE = "STAFF_INVITE", "Invite Staff"
         STUDENT_IMPORT = "STUDENT_IMPORT", "Import Students"
         CUSTOM = "CUSTOM", "Custom Step"
+
+        # Academic related steps
+        ACADEMIC_YEAR_SETUP = "ACADEMIC_YEAR_SETUP", "Set Up Current Academic Year"
+        TERMS_SETUP = "TERMS_SETUP", "Define Terms / Semesters"
+        CLASS_LEVELS_SETUP = "CLASS_LEVELS_SETUP", "Create Class Levels / Forms"
+        CLASS_GROUPS_SETUP = "CLASS_GROUPS_SETUP", "Create Class Groups / Streams"
+        SUBJECTS_SETUP = "SUBJECTS_SETUP", "Add Subjects (Core & Elective)"
     
     progress = models.ForeignKey(
         OnboardingProgress, 
@@ -115,22 +124,68 @@ class OnboardingStep(models.Model):
         return f"{status} Step {self.step_number}: {self.title}"
     
     def mark_complete(self, user=None):
-        """Mark this step as completed"""
+        # For academic steps: check real data before allowing completion
+        if self.step_type in [
+            self.StepType.ACADEMIC_YEAR_SETUP,
+            self.StepType.TERMS_SETUP,
+            self.StepType.CLASS_LEVELS_SETUP,
+            self.StepType.CLASS_GROUPS_SETUP,
+            self.StepType.SUBJECTS_SETUP,
+        ]:
+            if not self.is_academic_step_fulfilled():
+                raise ValidationError(
+                    f"Cannot complete '{self.title}' yet. "
+                    f"Please finish the required academic setup first."
+                )
 
         self.is_completed = True
         self.completed_at = timezone.now()
         if user:
             self.completed_by = user
         self.save()
-        
-        # Update parent progress
+
+        # Update overall progress
         self.progress.calculate_completion_percentage()
-        
-        # Check if all steps are completed
-        if self.progress.steps.filter(is_required=True, is_completed=False).count() == 0:
+
+        # Auto-complete entire onboarding if all required steps are done
+        remaining_required = self.progress.steps.filter(
+            is_required=True,
+            is_completed=False
+        ).count()
+
+        if remaining_required == 0:
             self.progress.status = OnboardingProgress.OnboardingStatus.COMPLETED
             self.progress.completed_at = timezone.now()
             self.progress.save()
+        
+
+
+    def is_academic_step_fulfilled(self) -> bool:
+        """Check if the academic step is actually done based on real data"""
+        if not self.progress or not self.progress.school:
+            return False
+
+        school = self.progress.school
+
+        if self.step_type == self.StepType.ACADEMIC_YEAR_SETUP:
+            return AcademicYear.objects.filter(school=school, is_current=True).exists()
+
+        if self.step_type == self.StepType.TERMS_SETUP:
+            current_year = AcademicYear.objects.filter(school=school, is_current=True).first()
+            if not current_year:
+                return False
+            return current_year.terms.filter(is_current=True).exists()
+
+        if self.step_type == self.StepType.CLASS_LEVELS_SETUP:
+            return ClassLevel.objects.filter(school=school, is_active=True).count() >= 3
+
+        if self.step_type == self.StepType.CLASS_GROUPS_SETUP:
+            return ClassGroup.objects.filter(class_level__school=school).exists()
+
+        if self.step_type == self.StepType.SUBJECTS_SETUP:
+            return Subject.objects.filter(school=school).count() >= 8
+
+        return self.is_completed
 
 
 class OnboardingChecklist(models.Model):
