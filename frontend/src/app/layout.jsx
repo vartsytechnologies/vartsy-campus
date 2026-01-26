@@ -1,7 +1,12 @@
 import { Instrument_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
+// import { Providers } from "@/components/Provider";
+import { AuthProvider } from "@/context/AuthContext";
+import CsrfInit from "@/components/CX";
 import ScrollToTop from "@/components/Totop";
 import Logo from "@/assets/white.svg";
+
+import { Toaster } from "@/components/ui/sonner";
 
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
@@ -28,8 +33,12 @@ export default function RootLayout({ children }) {
         className={`${instrumentSans.variable} ${geistMono.variable} antialiased `}
         data-scroll-behavior="smooth"
       >
-        {children}
+        {/* Children with auth provider */}
+        {/* <Providers>{children}</Providers> */}
+        <CsrfInit />
+        <AuthProvider>{children}</AuthProvider>
         <ScrollToTop />
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
