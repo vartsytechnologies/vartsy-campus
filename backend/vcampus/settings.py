@@ -58,12 +58,14 @@ SHARED_APPS = (
     "anymail",
     "drf_spectacular_sidecar",
     "rest_framework_simplejwt.token_blacklist",
+
 )
 
 TENANT_APPS = (
     # apps whose tables live per-tenant
     "django.contrib.contenttypes",
     "rest_framework",
+    "onboarding",
     # later: attendance, classes, finance, etc.
 )
 
