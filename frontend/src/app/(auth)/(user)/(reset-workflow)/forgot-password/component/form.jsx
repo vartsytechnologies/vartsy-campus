@@ -42,7 +42,7 @@ function ForgotPasswordForm() {
             <div className="flex items-center justify-center mt-1 font-medium">
               <p className="text-xs md:text-sm">
                 Remember your password?
-                <Link href="/login">
+                <Link href="/user/login">
                   <span className="ml-2 text-(--custom-green) md:text-(--custom-blue-3)">
                     Back to sign in
                   </span>

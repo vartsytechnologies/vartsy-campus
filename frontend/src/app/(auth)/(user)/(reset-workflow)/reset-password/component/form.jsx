@@ -23,7 +23,7 @@ function ResetPasswordForm() {
   useEffect(() => {
     if (!token) {
       // No token provided - redirect to forgot password
-      router.push("/admin/forgot-password");
+      router.push("/user/forgot-password");
       return;
     }
 

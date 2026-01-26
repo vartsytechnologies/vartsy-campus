@@ -60,7 +60,7 @@ function LoginForm() {
       peer-focus:text-[#3304a1]
       peer-[:not(:placeholder-shown)]:-top-2
       peer-[:not(:placeholder-shown)]:text-xs
-      bg-white
+      bg-(--custom-white) md:bg-white 
       px-1
     "
           >
@@ -83,7 +83,7 @@ function LoginForm() {
       peer-focus:text-[#3304a1]
       peer-[:not(:placeholder-shown)]:-top-2
       peer-[:not(:placeholder-shown)]:text-xs
-      bg-white
+      bg-(--custom-white) md:bg-white 
       px-1
     "
           >
@@ -104,14 +104,14 @@ function LoginForm() {
 
           <label
             htmlFor="password"
-            className="hidden md:block pointer-events-none absolute left-3 top-4 text-sm text-neutral-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-[#3304a1] peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs bg-white px-1"
+            className="hidden md:block pointer-events-none absolute left-3 top-4 text-sm text-neutral-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-[#3304a1] peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs bg-(--custom-white) md:bg-white  px-1"
           >
             Password
           </label>
 
           <label
             htmlFor="password"
-            className="block md:hidden pointer-events-none absolute left-3 top-3 text-sm text-neutral-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-[#3304a1] peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs bg-white px-1"
+            className="block md:hidden pointer-events-none absolute left-3 top-3 text-sm text-neutral-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm peer-focus:-top-2 peer-focus:text-xs peer-focus:text-[#3304a1] peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs bg-(--custom-white) md:bg-white  px-1"
           >
             Password
           </label>
@@ -128,29 +128,13 @@ function LoginForm() {
             )}
           </button>
         </div>
-        <div className="flex items-end mt-1 justify-end ">
-          <Link href="/admin/forgot-password">
-            <p className="text-xs md:text-sm font-medium text-(--custom-green)">
-              Forgot your password?
-            </p>
-          </Link>
-        </div>
+
         <Button
           type="submit"
           className="bg-(--custom-green) cursor-pointer text-white hover:bg-(--custom-green) hover:text-white w-full mt-2 md:mt-4"
         >
           Log in
         </Button>
-        <div className="flex items-start justify-start mt-1 font-medium">
-          <p className="text-xs md:text-sm ">
-            Don't have an account?
-            <Link href="/admin/signup">
-              <span className="ml-2 text-(--custom-green)">
-                Create an account
-              </span>
-            </Link>
-          </p>
-        </div>
       </form>
     </>
   );

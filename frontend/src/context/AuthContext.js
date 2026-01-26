@@ -1,15 +1,28 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { resolve } from "styled-jsx/css";
 
 const AuthContext = createContext();
 
+const PROTECTED_ROUTES = [
+  "/root",
+  "/admin",
+  "/student",
+  "/teacher",
+  "/parent",
+  "/recruiter",
+];
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const checkAuth = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/me/`,
@@ -17,6 +30,10 @@ export function AuthProvider({ children }) {
           credentials: "include",
         },
       );
+
+      if (!response.ok) {
+        console.error("Login error:", response.status);
+      }
 
       if (response.ok) {
         const userData = await response.json();
@@ -32,10 +49,16 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Check auth once on mount
+  // Fetch user data (only once per session)
   useEffect(() => {
-    checkAuth();
-  }, []);
+    const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
+      pathname.startsWith(route),
+    );
+
+    if (isProtectedRoute && !hasCheckedAuth) {
+      checkAuth().then(() => setHasCheckedAuth(true));
+    }
+  }, [pathname, hasCheckedAuth]);
 
   const logout = async () => {
     try {
@@ -44,6 +67,7 @@ export function AuthProvider({ children }) {
         credentials: "include",
       });
       setUser(null);
+      setHasCheckedAuth(false);
 
       const hostname = window.location.hostname;
       const mainDomain = process.env.NEXT_PUBLIC_DOMAIN;
@@ -55,6 +79,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error("Logout failed:", error);
       setUser(null);
+      setHasCheckedAuth(false);
       router.push("/portal");
     }
   };

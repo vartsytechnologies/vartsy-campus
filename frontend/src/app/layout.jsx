@@ -1,6 +1,8 @@
 import { Instrument_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/Provider";
+// import { Providers } from "@/components/Provider";
+import { AuthProvider } from "@/context/AuthContext";
+import CsrfInit from "@/components/CX";
 import ScrollToTop from "@/components/Totop";
 import Logo from "@/assets/white.svg";
 
@@ -32,7 +34,9 @@ export default function RootLayout({ children }) {
         data-scroll-behavior="smooth"
       >
         {/* Children with auth provider */}
-        <Providers>{children}</Providers>
+        {/* <Providers>{children}</Providers> */}
+        <CsrfInit />
+        <AuthProvider>{children}</AuthProvider>
         <ScrollToTop />
         <Toaster position="top-right" richColors />
       </body>

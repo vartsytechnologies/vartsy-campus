@@ -7,22 +7,23 @@ const ROUTE_CONFIG = {
 
   mainDomainAuth: [
     "/root/login",
-    "/admin/login",
-    "/admin/signup",
-    "/admin/forgot-password",
-    "/admin/reset-password",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
   ],
 
   schoolDomainAuth: ["/portal"],
 
   schoolDomainRoutes: [
-    "/student-dashboard",
-    "/teacher-dashboard",
-    "/parent-dashboard",
-    "/recruiter-dashboard",
+    "/admin",
+    "/student",
+    "/teacher",
+    "/parent",
+    "/recruiter",
   ],
 
-  mainDomainRoutes: ["/root", "/admin"],
+  mainDomainRoutes: ["/root"],
 
   roleAccess: {
     root: {
@@ -40,7 +41,7 @@ const ROUTE_CONFIG = {
         allowedPrefix: "/admin",
         defaultRedirect: "/admin",
         denyPrefixes: ["/root"],
-        denyRedirect: "/admin/login",
+        denyRedirect: "/portal",
       },
       schoolDomain: {
         allowAll: true,
@@ -49,41 +50,41 @@ const ROUTE_CONFIG = {
     student: {
       mainDomain: {
         deny: true,
-        denyRedirect: "/admin/login",
+        denyRedirect: "/portal",
       },
       schoolDomain: {
-        allowedPrefix: "/student-dashboard",
-        defaultRedirect: "/student-dashboard",
+        allowedPrefix: "/student",
+        defaultRedirect: "/student",
       },
     },
     teacher: {
       mainDomain: {
         deny: true,
-        denyRedirect: "/admin/login",
+        denyRedirect: "/portal",
       },
       schoolDomain: {
-        allowedPrefix: "/teacher-dashboard",
-        defaultRedirect: "/teacher-dashboard",
+        allowedPrefix: "/teacher",
+        defaultRedirect: "/teacher",
       },
     },
     parent: {
       mainDomain: {
         deny: true,
-        denyRedirect: "/admin/login",
+        denyRedirect: "/portal",
       },
       schoolDomain: {
-        allowedPrefix: "/parent-dashboard",
-        defaultRedirect: "/parent-dashboard",
+        allowedPrefix: "/parent",
+        defaultRedirect: "/parent",
       },
     },
     recruiter: {
       mainDomain: {
         deny: true,
-        denyRedirect: "/admin/login",
+        denyRedirect: "/portal",
       },
       schoolDomain: {
-        allowedPrefix: "/recruiter-dashboard",
-        defaultRedirect: "/recruiter-dashboard",
+        allowedPrefix: "/recruiter",
+        defaultRedirect: "/recruiter",
       },
     },
   },
@@ -91,6 +92,7 @@ const ROUTE_CONFIG = {
 
 export default function proxy(request) {
   const token = request.cookies.get("token")?.value;
+  // const role = request.cookies.get("role")?.value;
   const path = request.nextUrl.pathname;
 
   const host = request.headers.get("host") ?? "";
@@ -142,7 +144,7 @@ export default function proxy(request) {
     }
   }
 
-  // AUTH ROUTES - Allow without token (for login/signup)
+  // AUTH ROUTES - Allow without token
   if (ROUTE_CONFIG.mainDomainAuth.includes(path)) {
     if (isMainDomain) {
       return NextResponse.next();
@@ -155,24 +157,24 @@ export default function proxy(request) {
     if (isSchoolDomain) {
       return NextResponse.next();
     } else {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      return NextResponse.redirect(new URL("/portal", request.url));
     }
   }
 
   // Protect school domain routes from main domain access
   if (isMainDomain) {
     const isSchoolRoute = ROUTE_CONFIG.schoolDomainRoutes.some((route) =>
-      path.startsWith(route)
+      path.startsWith(route),
     );
     if (isSchoolRoute) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      return NextResponse.redirect(new URL("/portal", request.url));
     }
   }
 
   // Protect main domain routes from school domain access
   if (isSchoolDomain) {
     const isMainRoute = ROUTE_CONFIG.mainDomainRoutes.some((route) =>
-      path.startsWith(route)
+      path.startsWith(route),
     );
     if (isMainRoute) {
       return NextResponse.redirect(new URL("/portal", request.url));
@@ -181,12 +183,11 @@ export default function proxy(request) {
     if (token) {
       const user = decodeJWT(token);
       if (user && (user.role === "root" || user.role === "admin")) {
-        // Redirect root/admin back to their main domain dashboard
         const mainDomain = process.env.MAIN_DOMAIN || "localhost";
         const protocol = request.nextUrl.protocol;
         const redirect = user.role === "root" ? "/root" : "/admin";
         return NextResponse.redirect(
-          new URL(`${protocol}//${mainDomain}${redirect}`)
+          new URL(`${protocol}//${mainDomain}${redirect}`),
         );
       }
     }
@@ -198,10 +199,8 @@ export default function proxy(request) {
       if (path.startsWith("/root")) {
         return NextResponse.redirect(new URL("/root/login", request.url));
       }
-      if (path.startsWith("/admin")) {
-        return NextResponse.redirect(new URL("/admin/login", request.url));
-      }
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+
+      return NextResponse.redirect(new URL("/portal", request.url));
     } else {
       return NextResponse.redirect(new URL("/portal", request.url));
     }
@@ -214,10 +213,8 @@ export default function proxy(request) {
       if (path.startsWith("/root")) {
         return NextResponse.redirect(new URL("/root/login", request.url));
       }
-      if (path.startsWith("/admin")) {
-        return NextResponse.redirect(new URL("/admin/login", request.url));
-      }
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+
+      return NextResponse.redirect(new URL("/", request.url));
     } else {
       return NextResponse.redirect(new URL("/portal", request.url));
     }
@@ -229,7 +226,7 @@ export default function proxy(request) {
   if (!roleConfig) {
     // Unknown role
     if (isMainDomain) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      return NextResponse.redirect(new URL("/login", request.url));
     } else {
       return NextResponse.redirect(new URL("/portal", request.url));
     }
@@ -247,18 +244,18 @@ export default function proxy(request) {
     // Check if role is denied on main domain
     if (mainConfig.deny) {
       return NextResponse.redirect(
-        new URL(mainConfig.denyRedirect, request.url)
+        new URL(mainConfig.denyRedirect, request.url),
       );
     }
 
     // Check if accessing denied prefixes
     if (mainConfig.denyPrefixes) {
       const isDenied = mainConfig.denyPrefixes.some((prefix) =>
-        path.startsWith(prefix)
+        path.startsWith(prefix),
       );
       if (isDenied) {
         return NextResponse.redirect(
-          new URL(mainConfig.denyRedirect, request.url)
+          new URL(mainConfig.denyRedirect, request.url),
         );
       }
     }
@@ -271,7 +268,7 @@ export default function proxy(request) {
     // Default redirect for main domain
     if (mainConfig.defaultRedirect) {
       return NextResponse.redirect(
-        new URL(mainConfig.defaultRedirect, request.url)
+        new URL(mainConfig.defaultRedirect, request.url),
       );
     }
 
@@ -290,7 +287,7 @@ export default function proxy(request) {
     // Check if role is denied on school domain
     if (schoolConfig.deny) {
       return NextResponse.redirect(
-        new URL(schoolConfig.denyRedirect, request.url)
+        new URL(schoolConfig.denyRedirect, request.url),
       );
     }
 
@@ -305,7 +302,7 @@ export default function proxy(request) {
     // Default redirect for school domain
     if (schoolConfig.defaultRedirect) {
       return NextResponse.redirect(
-        new URL(schoolConfig.defaultRedirect, request.url)
+        new URL(schoolConfig.defaultRedirect, request.url),
       );
     }
 

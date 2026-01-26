@@ -41,7 +41,7 @@ function Landing() {
             nemo eos velit, animi est incidunt odio quidem alias neque voluptas
             necessitatibus autem?
           </p>
-          <Link href="/admin/signup">
+          <Link href="/signup">
             <button className="font-bold cursor-pointer hover:bg-(--custom-blue-3)/90 transition-colors duration-300 text-xl leading-none text-(--custom-blue-2) rounded-full bg-(--custom-blue-3)  px-10 py-4 flex items-center justify-center">
               Register
             </button>
