@@ -257,7 +257,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center justify-center text-sm py-2 gap-2 rounded-sm bg-(--custom-green) cursor-pointer text-white hover:bg-(--custom-green) hover:text-white w-full mt-2 md:mt-4"
+          className="flex items-center disabled:opacity-90 justify-center text-sm py-2 gap-2 rounded-sm bg-(--custom-green) cursor-pointer text-white hover:bg-(--custom-green) hover:text-white w-full mt-2 md:mt-4"
         >
           {loading ? (
             <>

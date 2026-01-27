@@ -2,16 +2,65 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
 
 function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleReset = (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
-    console.log("Reset link sent to:", email);
+    setLoading(true);
+    const email = e.currentTarget.email.value;
+    console.log("Password reset requested for:", email);
 
-    setIsSuccess(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API}/auth/password/forgot/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ email }),
+        },
+      );
+      const data = response.json();
+      if (!response.ok) {
+        console.error("Password reset error:", response.status, data);
+        setIsSuccess(false);
+        setLoading(false);
+        toast.error("Password reset error, please try again", {
+          style: {
+            background: "#dc3545",
+            color: "white",
+            fontSize: "15px",
+            border: "none",
+            borderRadius: "0",
+          },
+        });
+        return;
+      }
+      setIsSuccess(true);
+      setLoading(false);
+    } catch (error) {
+      setIsSuccess(false);
+      setLoading(false);
+      toast.error("Please check your network and try again", {
+        style: {
+          background: "#dc3545",
+          color: "white",
+          fontSize: "15px",
+          border: "none",
+          borderRadius: "0",
+        },
+      });
+      console.error("Password reset failed:", error);
+      return;
+    }
   };
 
   if (isSuccess) {
@@ -103,12 +152,24 @@ function ForgotPasswordForm() {
               Email address
             </label>
           </div>
-          <Button
+          <button
             type="submit"
-            className="md:bg-white bg-(--custom-green) cursor-pointer text-white md:text-(--custom-green) w-full mt-2 md:mt-10"
+            disabled={loading}
+            className="flex md:bg-white bg-(--custom-green) cursor-pointer text-white md:text-(--custom-green) items-center disabled:opacity-90 justify-center text-sm py-2 gap-2 rounded-sm   w-full mt-2 md:mt-4 "
           >
-            Get Link
-          </Button>
+            {loading ? (
+              <>
+                Sending link
+                <LoaderCircle
+                  size={15}
+                  className="animate-spin animation-duration:0.5s"
+                />
+              </>
+            ) : (
+              "Get Link"
+            )}
+          </button>
+
           <div className="flex items-center justify-center mt-1 font-medium">
             <p className="text-xs md:text-sm">
               Remember your password?

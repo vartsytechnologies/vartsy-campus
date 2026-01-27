@@ -4,142 +4,161 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
+import { toast } from "sonner";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const uid = searchParams.get("uid");
   const token = searchParams.get("token");
 
+  const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [cpassword, setCpassword] = useState("");
   const [eye, setEye] = useState(false);
   const [eye2, setEye2] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isValidating, setIsValidating] = useState(true);
-  const [tokenError, setTokenError] = useState("");
 
-  // Check for token on component mount
   useEffect(() => {
-    if (!token) {
-      // No token provided - redirect to forgot password
-      router.push("/user/forgot-password");
+    if (!token || !uid) {
+      router.push("/forgot-password");
       return;
     }
 
-    // Optional: Verify token with backend
-    // Uncomment and implement when your API is ready
-    /*
-    fetch('/api/verify-reset-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.valid) {
-          setIsValidating(false);
-        } else {
-          setTokenError('This reset link is invalid or has expired.');
-          setTimeout(() => {
-            router.push('/forgot-password?error=invalid-token');
-          }, 3000);
-        }
-      })
-      .catch(() => {
-        setTokenError('Unable to verify reset link.');
-        setTimeout(() => {
-          router.push('/forgot-password');
-        }, 3000);
-      });
-    */
-
-    // For now, just allow if token exists
     setIsValidating(false);
-  }, [token, router]);
+  }, [token, uid, router]);
 
-  const handleReset = (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Validation
-    if (password.length < 6) {
-      alert("Password must be at least 6 characters long!");
-      return;
-    }
-
-    // Check for at least one number
-    if (!/\d/.test(password)) {
-      alert("Password must contain at least one number!");
-      return;
-    }
-
-    // Check for at least one special character
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      alert("Password must contain at least one special character!");
-      return;
-    }
-
-    if (password !== cpassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    // Send password reset request with token
-    // Uncomment and implement when your API is ready
-    /*
-    fetch('/api/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setIsSuccess(true);
-        } else {
-          alert(data.message || 'Failed to reset password');
-        }
-      })
-      .catch(() => {
-        alert('An error occurred. Please try again.');
+    const body = {
+      uid,
+      token,
+      new_password: password,
+    };
+    console.log(body);
+    //validation first
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters long!", {
+        style: {
+          background: "#dc3545",
+          color: "white",
+          fontSize: "15px",
+          border: "none",
+          borderRadius: "0",
+        },
       });
-    */
+      setLoading(false);
+      return;
+    }
 
-    console.log("Password reset successful with token:", token);
-    setIsSuccess(true);
+    if (!/\d/.test(password)) {
+      toast.error("Password must contain at least one number!", {
+        style: {
+          background: "#dc3545",
+          color: "white",
+          fontSize: "15px",
+          border: "none",
+          borderRadius: "0",
+        },
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      toast.error("Password must contain at least one special character!", {
+        style: {
+          background: "#dc3545",
+          color: "white",
+          fontSize: "15px",
+          border: "none",
+          borderRadius: "0",
+        },
+      });
+      setLoading(false);
+      return;
+    }
+    if (password !== cpassword) {
+      toast.error("Passwords do not match!", {
+        style: {
+          background: "#dc3545",
+          color: "white",
+          fontSize: "15px",
+          border: "none",
+          borderRadius: "0",
+        },
+      });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API}/auth/password/change/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(body),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Password reset error:", response.status, data);
+        setIsSuccess(false);
+        setLoading(false);
+        toast.error("Password reset error, please try again", {
+          style: {
+            background: "#dc3545",
+            color: "white",
+            fontSize: "15px",
+            border: "none",
+            borderRadius: "0",
+          },
+        });
+        return;
+      }
+      setIsSuccess(true);
+    } catch (error) {
+      setIsSuccess(false);
+      setLoading(false);
+      toast.error("Please check your network and try again", {
+        style: {
+          background: "#dc3545",
+          color: "white",
+          fontSize: "15px",
+          border: "none",
+          borderRadius: "0",
+        },
+      });
+      console.error("Password reset failed:", error);
+    }
   };
 
-  // Show loading while validating token
+  // validate token
   if (isValidating) {
     return (
-      <div className="bg-(--custom-green) md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
-        <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col rounded-md shadow-lg text-black md:text-white">
+      <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
+        <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">
           <h2 className="py-6 font-semibold">VartsySMS</h2>
-          <p className="text-sm">Verifying reset link...</p>
+          <LoaderCircle
+            className="animate-spin mx-auto mb-4 text-(--custom-green) md:text-white"
+            size={48}
+          />
+          <p className="text-xs md:text-sm">Verifying reset link...</p>
         </div>
       </div>
     );
   }
 
-  // Show error if token is invalid
-  if (tokenError) {
-    return (
-      <div className="bg-(--custom-green) md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
-        <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col rounded-md shadow-lg text-black md:text-white">
-          <h2 className="py-6 font-semibold">VartsySMS</h2>
-          <div className="text-center px-4">
-            <h1 className="text-(--custom-green) md:text-(--custom-blue-3) font-semibold text-xl md:text-2xl mb-4">
-              Invalid Reset Link
-            </h1>
-            <p className="py-5 text-xs md:text-sm">{tokenError}</p>
-            <p className="text-xs md:text-sm">Redirecting...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Success view
   if (isSuccess) {
     return (
       <div className="bg-(--custom-green) md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
@@ -155,8 +174,8 @@ function ResetPasswordForm() {
               You can now sign in with your new password.
             </p>
             <Link href="/login">
-              <Button className="md:bg-white bg-(--custom-green) text-white md:text-(--custom-green) mb-4">
-                Go to Sign In
+              <Button className="md:bg-white bg-(--custom-green) text-white md:text-(--custom-green) mt-4">
+                Go to Login
               </Button>
             </Link>
           </div>
@@ -165,7 +184,6 @@ function ResetPasswordForm() {
     );
   }
 
-  // Form view
   return (
     <div className="bg-(--custom-green) md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
       <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col rounded-md shadow-lg text-black md:text-white">
@@ -175,7 +193,6 @@ function ResetPasswordForm() {
         </h1>
 
         <form onSubmit={handleReset} className="w-11/12 md:w-5/12 pb-10">
-          {/* Desktop Password Input */}
           <div className="hidden md:block relative w-full mt-10">
             <input
               id="password-desktop"
@@ -207,7 +224,6 @@ function ResetPasswordForm() {
             </button>
           </div>
 
-          {/* Mobile Password Input */}
           <div className="block md:hidden relative w-full mt-5">
             <input
               id="password-mobile"
@@ -302,13 +318,24 @@ function ResetPasswordForm() {
               )}
             </button>
           </div>
-
-          <Button
+          <button
             type="submit"
-            className="md:bg-white bg-(--custom-green) cursor-pointer text-white md:text-(--custom-green) w-full mt-2 md:mt-10"
+            disabled={loading}
+            className="flex md:bg-white bg-(--custom-green) cursor-pointer text-white md:text-(--custom-green) items-center disabled:opacity-90 justify-center text-sm py-2 gap-2 rounded-sm   w-full mt-2 md:mt-4 "
           >
-            Change password
-          </Button>
+            {loading ? (
+              <>
+                Changing password
+                <LoaderCircle
+                  size={15}
+                  className="animate-spin animation-duration:0.5s"
+                />
+              </>
+            ) : (
+              "Change password"
+            )}
+          </button>
+
           <div className="flex items-center justify-center mt-1 font-medium">
             <p className="text-xs md:text-sm">
               Remember your password?
@@ -329,10 +356,14 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="bg-(--custom-green) md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
-          <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col rounded-md shadow-lg text-black md:text-white">
+        <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
+          <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">
             <h2 className="py-6 font-semibold">VartsySMS</h2>
-            <p className="text-sm">Loading...</p>
+            <LoaderCircle
+              className="animate-spin mx-auto mb-4 text-(--custom-green) md:text-white"
+              size={48}
+            />
+            <p className="text-xs md:text-sm">Loading...</p>
           </div>
         </div>
       }

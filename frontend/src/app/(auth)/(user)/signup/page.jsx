@@ -25,6 +25,7 @@ function SignUp() {
               <h2 className="text-xl md:text-2xl font-semibold">
                 Get Started Now!
               </h2>
+
               <Link
                 href="/"
                 className="text-(--custom-green) font-medium underline text-xs md:text-sm"

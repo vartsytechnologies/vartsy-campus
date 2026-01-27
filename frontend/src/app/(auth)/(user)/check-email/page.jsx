@@ -1,12 +1,13 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import ResendVerification from "../component/resendComponent";
 
-function CheckEmail() {
+function CheckEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email");
+
   useEffect(() => {
     if (!email) {
       router.replace("/signup");
@@ -16,6 +17,7 @@ function CheckEmail() {
   if (!email) {
     return null;
   }
+
   return (
     <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
       <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">
@@ -41,7 +43,6 @@ function CheckEmail() {
           <div className="flex items-center justify-center mt-1 font-medium">
             <p className="text-xs md:text-sm">
               <span className="mr-2"> Didn't receive email?</span>
-
               <ResendVerification email={email} />
             </p>
           </div>
@@ -51,4 +52,19 @@ function CheckEmail() {
   );
 }
 
-export default CheckEmail;
+export default function CheckEmail() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
+          <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">
+            <h2 className="py-6 font-semibold">VartsySMS</h2>
+            <p className="text-xs md:text-sm">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <CheckEmailContent />
+    </Suspense>
+  );
+}

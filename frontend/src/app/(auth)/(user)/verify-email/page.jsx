@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
 
-function VerifyEmail() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const uid = searchParams.get("uid");
@@ -157,4 +157,23 @@ function VerifyEmail() {
   );
 }
 
-export default VerifyEmail;
+export default function VerifyEmail() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
+          <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">
+            <h2 className="py-6 font-semibold">VartsySMS</h2>
+            <LoaderCircle
+              className="animate-spin mx-auto mb-4 text-(--custom-green) md:text-white"
+              size={48}
+            />
+            <p className="text-xs md:text-sm">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
+  );
+}
