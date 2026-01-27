@@ -25,8 +25,9 @@ RUN adduser --disabled-password --gecos "" appuser
 # Copy application code
 COPY . .
 
-# Create static directory and fix ownership
-RUN mkdir -p /app/staticfiles \
+# Ensure shell scripts are executable and create static directory with proper ownership
+RUN chmod +x /app/scripts/*.sh \
+    && mkdir -p /app/staticfiles \
     && chown -R appuser:appuser /app
 
 USER appuser
