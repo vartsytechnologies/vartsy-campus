@@ -20,7 +20,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 
 User = get_user_model()
-email = os.getenv("DJANGO_SUPERUSER_EMAIL", "admin@example.com").strip().lower()
+email = os.getenv("DJANGO_SUPERUSER_EMAIL", "superadmin@gmail.com").strip().lower()
 
 if not User.objects.filter(email=email).exists():
     call_command("create_company_superuser")
