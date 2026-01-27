@@ -1,19 +1,25 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
+
+import ResendVerify from "./resendlink";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [eye, setEye] = useState(false);
+  const [showResend, setShowResend] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setShowResend(false);
+
     const formData = new FormData(e.currentTarget);
 
     const body = {
@@ -42,9 +48,29 @@ function LoginForm() {
         setLoading(false);
         console.error("Login error:", response.status, data);
 
+        if (response.status === 403) {
+          setShowResend(true);
+
+          let errorMessage = "Please verify your email ";
+          if (data.detail && typeof data.detail === "string") {
+            errorMessage = data.detail;
+          }
+
+          toast.error(errorMessage, {
+            style: {
+              background: "#dc3545",
+              color: "white",
+              fontSize: "15px",
+              border: "none",
+              borderRadius: "0",
+            },
+          });
+          return;
+        }
+
         let errorMessage = "Login error";
 
-        // Extract error
+        // Extract other error
         if (data.detail) {
           if (typeof data.detail === "string") {
             errorMessage = data.detail;
@@ -84,7 +110,8 @@ function LoginForm() {
 
       console.log("Login successful:", data);
 
-      // router.push("/dashboard");
+      // Redirect to dashboard
+      router.push("/onboarding");
     } catch (error) {
       setLoading(false);
       toast.error("Please check your network and try again", {
@@ -99,6 +126,7 @@ function LoginForm() {
       console.error("Login failed:", error);
     }
   };
+
   return (
     <>
       <form id="handle-login" onSubmit={handleLogin}>
@@ -225,21 +253,25 @@ function LoginForm() {
             </p>
           </Link>
         </div>
+
         <button
           type="submit"
           disabled={loading}
-          className="flex justify-center py-2 gap-2 rounded-sm bg-(--custom-green) cursor-pointer text-white hover:bg-(--custom-green) hover:text-white w-full mt-2 md:mt-4"
+          className="flex items-center justify-center text-sm py-2 gap-2 rounded-sm bg-(--custom-green) cursor-pointer text-white hover:bg-(--custom-green) hover:text-white w-full mt-2 md:mt-4"
         >
           {loading ? (
             <>
               Logging in
-              <LoaderCircle className="animate-spin animation-duration:0.5s" />
+              <LoaderCircle
+                size={15}
+                className="animate-spin animation-duration:0.5s"
+              />
             </>
           ) : (
             "Log in"
           )}
         </button>
-        <div className="flex items-start justify-start mt-1 font-medium">
+        <div className="mb-2 flex items-start justify-start mt-1 font-medium">
           <p className="text-xs md:text-sm ">
             Don't have an account?
             {loading ? (
@@ -255,6 +287,7 @@ function LoginForm() {
             )}
           </p>
         </div>
+        {showResend && <ResendVerify email={email} />}
       </form>
     </>
   );

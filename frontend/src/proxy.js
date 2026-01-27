@@ -11,6 +11,8 @@ const ROUTE_CONFIG = {
     "/signup",
     "/forgot-password",
     "/reset-password",
+    "/verify-email",
+    "/check-email",
   ],
 
   schoolDomainAuth: ["/portal"],

@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 function Google({ text }) {
   const googleAccess = async (e) => {
     e.preventDefault;
+    const body = {
+      auth_provider: "google",
+    };
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_API}/auth/google/onetap/`,
@@ -12,13 +15,14 @@ function Google({ text }) {
             "Content-Type": "application/json",
           },
           credentials: "include",
+          body: JSON.stringify(body),
         },
       );
 
-      // const data = await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
-        console.error("signup error:", response.status);
+        console.error("signup error:", response.status, data);
       }
 
       // console.log("signup successful:", data);

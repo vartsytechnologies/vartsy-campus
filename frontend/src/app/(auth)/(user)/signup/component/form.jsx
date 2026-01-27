@@ -134,7 +134,7 @@ function SignupForm() {
       setCpassword("");
       setLoading(false);
 
-      toast.success("Account created successfully!", {
+      toast.success("Account created! Please check your email to verify", {
         style: {
           background: "#3304a1",
           color: "white",
@@ -144,7 +144,7 @@ function SignupForm() {
         },
       });
 
-      router.replace("/login");
+      router.replace(`/check-email?email=${encodeURIComponent(email)}`);
       console.log("signup successful:", response.status, data);
     } catch (error) {
       setLoading(false);
@@ -490,12 +490,15 @@ function SignupForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex justify-center py-2 gap-2 rounded-sm bg-(--custom-green) cursor-pointer  text-white hover:bg-(--custom-green) hover:text-white w-full mt-3 md:mt-4"
+          className="flex items-center justify-center py-2 gap-2 text-sm rounded-sm bg-(--custom-green) cursor-pointer  text-white hover:bg-(--custom-green) hover:text-white w-full mt-3 md:mt-4"
         >
           {loading ? (
             <>
               Creating account
-              <LoaderCircle className="animate-spin animation-duration:0.5s" />
+              <LoaderCircle
+                size={15}
+                className="animate-spin animation-duration:0.5s"
+              />
             </>
           ) : (
             "Create account"
