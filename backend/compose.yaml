@@ -37,6 +37,8 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      STATIC_ROOT_DIR: /vol/web/static
     volumes:
       - .:/app
     depends_on:

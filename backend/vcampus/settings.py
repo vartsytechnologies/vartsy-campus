@@ -222,7 +222,8 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Allow overriding STATIC_ROOT via env so Docker can use a writable path
+STATIC_ROOT = Path(os.getenv("STATIC_ROOT_DIR", str(BASE_DIR / "staticfiles")))
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
