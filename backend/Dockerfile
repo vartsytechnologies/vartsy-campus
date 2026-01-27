@@ -33,6 +33,8 @@ USER appuser
 
 EXPOSE 8000
 
-# Default entrypoint/command use the existing shell scripts;
-# platforms like Render can override the start command if needed.
+# Use a small bash-based entrypoint to normalize scripts (line endings,
+# permissions) before executing the requested command. Platforms like Render
+# can still override the CMD to choose a different start script.
+ENTRYPOINT ["bash", "/app/scripts/entrypoint.sh"]
 CMD ["/app/scripts/start_api.sh"]
