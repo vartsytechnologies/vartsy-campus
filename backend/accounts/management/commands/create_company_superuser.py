@@ -33,7 +33,13 @@ class Command(BaseCommand):
 
         user, created = CustomUser.objects.get_or_create(
             email=email,
-            defaults={"is_staff": True, "is_superuser": True, "is_active": True},
+            defaults={
+                "is_staff": True,
+                "is_superuser": True,
+                "is_active": True,
+                "is_email_verified": True,
+                "role": CustomUser.Roles.SUPER_ADMIN,
+            },
         )
 
         if created:
@@ -42,13 +48,18 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"Superuser {email} created."))
             return
 
-        # If user already exists
+        # If user already exists, ensure flags, optionally reset password.
         if opts["reset_password"]:
             user.set_password(password)
-            user.is_staff = True
-            user.is_superuser = True
-            user.is_active = True
-            user.save()
+
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_active = True
+        user.is_email_verified = True
+        user.role = CustomUser.Roles.SUPER_ADMIN
+        user.save()
+
+        if opts["reset_password"]:
             self.stdout.write(
                 self.style.WARNING(
                     f"Superuser {email} existed — password reset & flags ensured."
@@ -56,5 +67,7 @@ class Command(BaseCommand):
             )
         else:
             self.stdout.write(
-                self.style.WARNING(f"Superuser {email} already exists — skipped.")
+                self.style.WARNING(
+                    f"Superuser {email} already exists — flags ensured (password unchanged)."
+                )
             )
