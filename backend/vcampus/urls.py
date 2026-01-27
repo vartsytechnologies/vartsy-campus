@@ -25,7 +25,11 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 def healthz(_):
     return JsonResponse({"status": "ok"})
 
+def root(_):
+    return JsonResponse({"status": "ok", "service": "vcampus-backend"})
+
 urlpatterns = [
+    path('', root, name='root'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
     path("api/tenant/", include("tenancy.urls")),    # tenant utilities
