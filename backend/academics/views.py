@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
@@ -65,7 +65,7 @@ class IsSchoolAdminOrReadOnly(IsAuthenticated):
 # AcademicYear ViewSet
 # ──────────────────────────────────────────────────────────────
 
-class AcademicYearViewSet(viewsets.ModelViewSet):
+class AcademicYearViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsSchoolAdminOrReadOnly]
     lookup_field = 'pk'
 
@@ -113,7 +113,7 @@ class AcademicYearViewSet(viewsets.ModelViewSet):
 # Term ViewSet
 # ──────────────────────────────────────────────────────────────
 
-class TermViewSet(viewsets.ModelViewSet):
+class TermViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsSchoolAdminOrReadOnly]
 
     def get_queryset(self):
@@ -136,7 +136,7 @@ class TermViewSet(viewsets.ModelViewSet):
 # ClassLevel ViewSet
 # ──────────────────────────────────────────────────────────────
 
-class ClassLevelViewSet(viewsets.ModelViewSet):
+class ClassLevelViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsSchoolAdminOrReadOnly]
 
     def get_queryset(self):
@@ -159,7 +159,7 @@ class ClassLevelViewSet(viewsets.ModelViewSet):
 # ClassGroup ViewSet
 # ──────────────────────────────────────────────────────────────
 
-class ClassGroupViewSet(viewsets.ModelViewSet):
+class ClassGroupViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsSchoolAdminOrReadOnly]
 
     def get_queryset(self):
@@ -188,7 +188,7 @@ class ClassGroupViewSet(viewsets.ModelViewSet):
 # Subject ViewSet
 # ──────────────────────────────────────────────────────────────
 
-class SubjectViewSet(viewsets.ModelViewSet):
+class SubjectViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsSchoolAdminOrReadOnly]
 
     def get_queryset(self):

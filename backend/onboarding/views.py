@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -22,7 +22,7 @@ from .serializers import (
 )
 
 
-class OnboardingProgressViewSet(viewsets.ModelViewSet):
+class OnboardingProgressViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = OnboardingProgress.objects.all()
     serializer_class = OnboardingProgressSerializer
     permission_classes = [IsAuthenticated]
@@ -80,7 +80,7 @@ class OnboardingProgressViewSet(viewsets.ModelViewSet):
         })
 
 
-class OnboardingStepViewSet(viewsets.ModelViewSet):
+class OnboardingStepViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = OnboardingStep.objects.all()
     serializer_class = OnboardingStepSerializer
     permission_classes = [IsAuthenticated]
@@ -140,7 +140,7 @@ class OnboardingStepViewSet(viewsets.ModelViewSet):
         })
 
 
-class OnboardingChecklistViewSet(viewsets.ModelViewSet):
+class OnboardingChecklistViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = OnboardingChecklist.objects.all()
     serializer_class = OnboardingChecklistSerializer
     permission_classes = [IsAuthenticated]
@@ -164,7 +164,7 @@ class OnboardingChecklistViewSet(viewsets.ModelViewSet):
         })
 
 
-class OnboardingNoteViewSet(viewsets.ModelViewSet):
+class OnboardingNoteViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = OnboardingNote.objects.all()
     serializer_class = OnboardingNoteSerializer
     permission_classes = [IsAuthenticated]
