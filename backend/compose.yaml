@@ -34,8 +34,6 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    volumes:
-      - .:/app
     depends_on:
       db:
         condition: service_healthy
@@ -55,8 +53,6 @@ services:
     command: /app/scripts/start_worker.sh 
     env_file: 
       - .env
-    volumes:
-      - .:/app
     depends_on:
       db:
         condition: service_healthy
@@ -71,8 +67,6 @@ services:
     command: /app/scripts/start_beat.sh
     env_file: 
       - .env
-    volumes:
-      - .:/app
     depends_on:
       db:
         condition: service_healthy
