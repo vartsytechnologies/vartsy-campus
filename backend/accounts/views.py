@@ -293,6 +293,31 @@ class MeView(APIView):
             "user data": data
             },
             status=status.HTTP_200_OK)
+    @extend_schema(
+    summary="Update current user profile",
+    description="""
+    ## Update Profile
+
+    Allows the authenticated user to update their profile information.
+    Email and role cannot be changed through this endpoint.
+    """,
+    request=MeSerializer,
+    responses={
+        200: MeSerializer,
+        400: OpenApiResponse(description="Validation errors."),
+        401: OpenApiResponse(description="Not authenticated."),
+        403: OpenApiResponse(description="Email not verified."),
+    },
+    tags=["Authentication"],
+    )
+    def patch(self, request):
+        serializer = MeSerializer(
+            request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     
 #----------- TOKEN REFRESH VIEW ----------
 class CookieTokenRefreshView(TokenRefreshView):
