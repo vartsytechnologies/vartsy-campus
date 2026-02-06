@@ -14,7 +14,7 @@ from .serializers import (
     RegisterSerializer,MeSerializer,
     PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
     EmailVerificationSendSerializer, EmailVerificationSerializer,
-    LoginRequestSerializer, GoogleOneTapSerializer
+    LoginRequestSerializer, GoogleOneTapSerializer, ChangePasswordSerializer
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
@@ -105,9 +105,10 @@ class EmailVerificationView(APIView):
     serializer_class = EmailVerificationSerializer
     @extend_schema(
     auth=[],  # public
-    request=EmailVerificationSerializer,
-    responses={200: {"type":"object","properties":{"ok":{"type":"boolean"},"message":{"type":"string"}}},
-               400: {"type":"object","properties":{"detail":{"type":"string"}}}},
+    summary="Register a new user",
+    request=RegisterSerializer,
+    responses={201: OpenApiResponse(response=MeSerializer,description="User created successfully.",),
+            400: OpenApiResponse(description="Validation errors."),},
     description="Confirm email verification with uid and token.",
     examples=[OpenApiExample("Verify", value={"uid":"<uidb64>","token":"<token>"})],
     tags=["Authentication"],
@@ -158,7 +159,9 @@ class ResendEmailVerificationView(APIView):
     @extend_schema(
     auth=[],  # public
     request=EmailVerificationSendSerializer,
-    responses={200: {"type":"object","properties":{"message":{"type":"string"},"details":{"type":"object"}}}},
+    responses={200: OpenApiResponse(description="Verification email sent if the email exists and is not already verified."),
+               400: OpenApiResponse(description="Email already verified."),
+               500: OpenApiResponse(description="Failed to send verification email.")},
     description="Resend email verification link to the given email or the authenticated user's email.",
     tags=["Authentication"],
     )
@@ -189,22 +192,31 @@ class LoginView(APIView):
     serializer_class = LoginRequestSerializer
     permission_classes = [AllowAny]
     @extend_schema(
-        auth=[],  # open endpoint in docs
-    description="Login with email and password. On success, JWT cookies (access_token, refresh_token) are set.",
+    auth=[],  # open endpoint in docs
+    summary="Login",
+    description="""
+    ## User Login
+
+    Authenticates a user with email and password.
+    On success, JWT tokens are set as **HttpOnly cookies**.
+
+    ### Security
+    Tokens are stored in HttpOnly, Secure, SameSite cookies
+    to prevent XSS attacks.
+    """,
     request=LoginRequestSerializer,  # updated to concrete serializer
     responses={
-        200: OpenApiResponse(
-            response={"type": "object", "properties": {"message": {"type": "string"}, "user data": {"type": "object"}}},
-            description="Login successful response",),
-        401: {"type": "object", "properties": {"detail": {"type": "string"}}},
-        403: {
-            "type": "object",
-            "properties": {
-                "detail": {"type": "string"},
-                "requires_email_verification": {"type": "boolean"}
-            }
+            200: OpenApiResponse(response=MeSerializer,description="Login successful.",),
+            401: OpenApiResponse(description="Invalid credentials."),
+            403: OpenApiResponse(description="Email not verified."),
         },
-    },
+    examples=[
+        OpenApiExample("Login Request",
+            value={
+                "email": "john.doe@example.com",
+                "password": "SecureP@ss123"},
+            request_only=True,),
+        ],
     tags=["Authentication"],
     )
     def post(self, request, *args, **kwargs):
@@ -228,15 +240,12 @@ class LoginView(APIView):
                 "requires_email_verification": True
             }, status= status.HTTP_403_FORBIDDEN)
 
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
-
         response = Response({
             "message": "Login successful.",
             "user data": MeSerializer(user).data
         })
 
-        set_jwt_cookies(response, str(access), str(refresh))
+        set_jwt_cookies(response, user)
 
         return response
 
@@ -247,12 +256,8 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated,IsVerified]
     @extend_schema(
     request=None,  #no request body
-    responses={
-        200: OpenApiResponse(
-            response={"type": "object", "properties": {"message": {"type": "string"}}},
-            description="Logout successful response",),
-        401: {"type": "object", "properties": {"detail": {"type": "string"}}},
-    },
+    responses={200: OpenApiResponse(description="Logged out successfully."),
+               401: OpenApiResponse(description="Not authenticated.")},
     description="Logout the current user by clearing JWT cookies.",
     tags=["Authentication"],
     )
@@ -275,7 +280,7 @@ class LogoutView(APIView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated,IsVerified]
     serializer_class = MeSerializer
-    @extend_schema(responses={200: MeSerializer,401: dict},
+    @extend_schema(responses={200: MeSerializer,401: OpenApiResponse(description="Not authenticated.")},
                description="Get details of the currently authenticated user.",
                tags=["Authentication"])
     def get(self, request):
@@ -297,8 +302,8 @@ class CookieTokenRefreshView(TokenRefreshView):
     auth=[],  # public
     request=None,
     responses={
-        200: {"type": "object", "properties": {"message": {"type": "string"}, "ok": {"type": "boolean"}}},
-        401: {"type": "object", "properties": {"detail": {"type": "string"}}},
+        200: OpenApiResponse(description="Token refreshed successfully."),
+        401: OpenApiResponse(description="Not authenticated."),
     },
     description="Refresh access token using refresh token from HttpOnly cookie.",
     tags=["Authentication"],
@@ -334,7 +339,8 @@ class ForgotPasswordView(APIView):
     serializer_class = PasswordResetRequestSerializer
     @extend_schema(
     request=PasswordResetRequestSerializer,
-    responses={200: {"type": "object", "properties": {"ok": {"type":"boolean"}}}},
+    responses={200: OpenApiResponse(description="Password reset email sent if the email exists and is not already verified."),
+               400: OpenApiResponse(description="Validation errors.")},
     description="Request a password reset link. Always returns 200 for privacy.",
     tags=["Authentication"],
     examples=[OpenApiExample("Request", value={"email": "user@example.com"})],
@@ -380,7 +386,7 @@ class ChangePasswordView(APIView):
     serializer_class = PasswordResetConfirmSerializer
     @extend_schema(
     request=PasswordResetConfirmSerializer,
-    responses={200: {"type":"object","properties":{"ok":{"type":"boolean"}}}, 400: dict},
+    responses={200: OpenApiResponse(description="Password has been reset successfully."), 400: OpenApiResponse(description="Invalid link or token.")},
     description="Confirm password reset using uid and token, then set a new password.",
     tags=["Authentication"],
     examples=[OpenApiExample("Confirm", value={"uid":"<uidb64>","token":"<token>","new_password":"NewStrong!23"})],
@@ -408,13 +414,57 @@ class ChangePasswordView(APIView):
             "ok": True})
 
 
+class ChangePasswordView(APIView):
+    """Change the authenticated user's password."""
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Change password",
+        description="""
+        ## Change Password
+
+        Allows the authenticated user to change their password.
+        Requires the current password for verification.
+        """,
+        request=ChangePasswordSerializer,
+        responses={
+            200: OpenApiResponse(description="Password changed successfully."),
+            400: OpenApiResponse(description="Validation errors."),
+        },
+        examples=[
+            OpenApiExample(
+                "Change Password Request",
+                value={
+                    "old_password": "OldP@ss123",
+                    "new_password": "NewSecureP@ss456",
+                },
+                request_only=True,
+            ),
+        ],
+    )
+    def post(self, request):
+        serializer = ChangePasswordSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        request.user.set_password(serializer.validated_data["new_password"])
+        request.user.save()
+
+        # Re-issue tokens after password change
+        response = Response(
+            {"detail": "Password changed successfully."},
+            status=status.HTTP_200_OK,
+        )
+        return set_jwt_cookies(response, request.user)
+
 class GoogleOneTapView(APIView):
     serializer_class = GoogleOneTapSerializer
     permission_classes = [AllowAny]
     @extend_schema(
     auth=[],  # public
     request=GoogleOneTapSerializer,
-    responses={200: {"type":"object","properties":{"detail":{"type":"string"}}}, 400: dict},
+    responses={200: OpenApiResponse(description="Google One Tap sign-in successful."), 400: OpenApiResponse(description="Invalid Google token or request.")},
     description="Sign in or sign up using Google One Tap with the provided ID token.",
     tags=["Authentication"],
     )

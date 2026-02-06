@@ -8,13 +8,17 @@ from rest_framework.response import Response
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework_simplejwt.tokens import RefreshToken 
 
 logger = logging.getLogger(__name__)
 
 def _seconds(td: timedelta) -> int:
     return int(td.total_seconds())
 
-def set_jwt_cookies(response: Response, access_token: str, refresh_token: str):
+def set_jwt_cookies(response: Response, user):
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+    refresh_token = str(refresh)
     cookie_params = dict(
         secure=getattr(settings, "SESSION_COOKIE_SECURE"),
         httponly=True,

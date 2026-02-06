@@ -117,7 +117,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "V-Campus API",
     "DESCRIPTION": "Unified School Management Platform (Auth, ERP, LMS, Fees, Onboarding, Academics, etc.)",
     "VERSION": "0.1.0",
-    "SERVE_INCLUDE_SCHEMA": True, 
+    "SERVE_INCLUDE_SCHEMA": False, 
     "SCHEMA_PATH_PREFIX": "/api/v1",
     "COMPONENT_NO_READ_ONLY_REQUIRED": True,
     "SWAGGER_UI_SETTINGS": {
@@ -239,8 +239,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ACCESS_TOKEN_COOKIE_NAME = os.getenv("ACCESS_TOKEN_COOKIE_NAME")
 REFRESH_TOKEN_COOKIE_NAME = os.getenv("REFRESH_TOKEN_COOKIE_NAME")
 
+def env_bool(name, default=False):
+    return os.getenv(name, str(default)).lower() == "true"
 
-SESSION_COOKIE_SECURE = os.getenv("COOKIE_SECURE")
+SESSION_COOKIE_SECURE = env_bool("COOKIE_SECURE", True)
 SAMESITE = os.getenv("SAMESITE")
 JWT_COOKIE_PATH = os.getenv("JWT_COOKIE_PATH")
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
@@ -252,12 +254,9 @@ EMAIL_BACKEND =os.environ.get("EMAIL_BACKEND")
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-def env_bool(name, default=False):
-    return os.getenv(name, str(default)).lower() == "true"
 
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS")
 EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL")
-SESSION_COOKIE_SECURE = env_bool("COOKIE_SECURE", True)
 
 
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
