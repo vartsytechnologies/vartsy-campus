@@ -15,7 +15,7 @@ from pathlib import Path
 from datetime import timedelta
 from django.core.management.utils import get_random_secret_key
 import dj_database_url
-from urllib.parse import quote_plus
+from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -140,30 +140,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'vcampus.wsgi.application'
 
 # Database
-# --- Local Postgres defaults (docker-compose) ---
-DB_NAME = os.getenv("DB_NAME","vcampus_db")
-DB_USER = os.getenv("DB_USER","vcampus_user")
-DB_PASSWORD = os.getenv("DB_PASSWORD","vcampus_password")
-DB_HOST = os.getenv("DB_HOST","localhost")
-DB_PORT = os.getenv("DB_PORT","5432")
-
-# URL-encode user and password to handle special characters
-quoted_user = quote_plus(DB_USER)
-quoted_password = quote_plus(DB_PASSWORD)
-
-LOCAL_DB_URL = f"postgres://{quoted_user}:{quoted_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-# If DATABASE_URL is present (e.g., on Render), use it; else use local
-DB_URL = os.getenv("DATABASE_URL", LOCAL_DB_URL)
-
-# Require SSL automatically when using a cloud DB
-SSL_REQUIRE = (os.getenv("DB_SSL_REQUIRE") or ("1" if os.getenv("DATABASE_URL") else "0")) == "1"
-
 DATABASES = {
-    "default": dj_database_url.parse(
-        DB_URL,
+    'default': dj_database_url.config(
+        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
         conn_max_age=600,
-        ssl_require=SSL_REQUIRE,
+        ssl_require=config('DB_SSL_REQUIRE', default=0, cast=bool),
     )
 }
 

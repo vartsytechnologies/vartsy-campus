@@ -18,3 +18,4 @@ requests>=2.31.0
 drf-spectacular-sidecar
 django-anymail
 django-tenants>=3.6.0
+python-decouple
