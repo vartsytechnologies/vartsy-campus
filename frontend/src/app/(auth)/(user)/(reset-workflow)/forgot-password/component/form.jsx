@@ -13,8 +13,6 @@ function ForgotPasswordForm() {
   const handleReset = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const email = e.currentTarget.email.value;
-    console.log("Password reset requested for:", email);
 
     try {
       const response = await fetch(
@@ -28,7 +26,9 @@ function ForgotPasswordForm() {
           body: JSON.stringify({ email }),
         },
       );
+
       const data = response.json();
+
       if (!response.ok) {
         console.error("Password reset error:", response.status, data);
         setIsSuccess(false);
@@ -91,7 +91,7 @@ function ForgotPasswordForm() {
             <div className="flex items-center justify-center mt-1 font-medium">
               <p className="text-xs md:text-sm">
                 Remember your password?
-                <Link href="/user/login">
+                <Link href="/login">
                   <span className="ml-2 text-(--custom-green) md:text-(--custom-blue-3)">
                     Back to sign in
                   </span>
@@ -104,7 +104,6 @@ function ForgotPasswordForm() {
     );
   }
 
-  //  normal form view
   return (
     <div className="bg-white md:bg-(--custom-white) w-full min-h-screen flex items-center justify-center">
       <div className="w-11/12 md:w-8/12 bg-white md:bg-(--custom-green) py-10 md:py-15 flex items-center justify-center flex-col md:rounded-md md:shadow-lg text-black md:text-white">

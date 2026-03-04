@@ -28,7 +28,7 @@ function SignupForm() {
       password: formData.get("password"),
       auth_provider: "local",
     };
-
+ console.log("Payload:", body)
     //validation first
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters long!", {

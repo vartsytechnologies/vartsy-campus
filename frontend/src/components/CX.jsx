@@ -12,9 +12,11 @@ export default function CsrfInit() {
             credentials: "include",
           },
         );
+
         if (!response.ok) {
           console.error("CSRF init error:", response.status);
         }
+        console.log("CSRF initialized successfully");
       } catch (err) {
         console.error("CSRF init failed:", err);
       }

@@ -8,6 +8,7 @@ function ResendVerification({ email }) {
   const [lastResendTime, setLastResendTime] = useState(null);
 
   const handleResend = async () => {
+    setResending(true);
     if (!email) {
       toast.error("Email not found.", {
         style: {
@@ -18,6 +19,7 @@ function ResendVerification({ email }) {
           borderRadius: "0",
         },
       });
+      setResending(false);
       return;
     }
 
@@ -45,13 +47,11 @@ function ResendVerification({ email }) {
             border: "none",
             borderRadius: "0",
           },
-          duration: 4000,
         });
+        setResending(false);
         return;
       }
     }
-
-    setResending(true);
 
     try {
       const response = await fetch(
@@ -70,9 +70,6 @@ function ResendVerification({ email }) {
 
       if (!response.ok) {
         let errorMessage = "Failed to resend email";
-        if (data.detail && typeof data.detail === "string") {
-          errorMessage = data.detail;
-        }
 
         toast.error(errorMessage, {
           style: {

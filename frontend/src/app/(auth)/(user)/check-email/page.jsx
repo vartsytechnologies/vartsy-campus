@@ -5,6 +5,7 @@ import ResendVerification from "../component/resendComponent";
 
 function CheckEmailContent() {
   const searchParams = useSearchParams();
+
   const router = useRouter();
   const email = searchParams.get("email");
 
